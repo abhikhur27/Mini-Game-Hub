@@ -57,4 +57,224 @@
         /* Navigation */
         .exhibit-list { list-style: none; margin-top: 4rem; }
         .exhibit-item { margin-bottom: 1.5rem; display: flex; align-items: baseline; }
-        .exhibit-item span { font-family: var(--font-mono); font-size:
+        .exhibit-item span { font-family: var(--font-mono); font-size: 0.7rem; margin-right: 1rem; color: var(--dim); }
+        .exhibit-link { text-decoration: none; color: var(--ink); font-size: 1.2rem; border-bottom: 1px transparent solid; cursor: pointer; }
+        .exhibit-link:hover { border-bottom: 1px solid var(--ink); }
+
+        /* Game Areas */
+        #stage { margin-top: 2rem; display: flex; flex-direction: column; align-items: center; }
+        canvas { border: 1px solid var(--border); background: #fafafa; max-width: 100%; }
+        
+        /* Wordle Styles */
+        .grid { display: grid; gap: 5px; margin-top: 1rem; }
+        .row { display: flex; gap: 5px; }
+        .tile { width: 45px; height: 45px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-weight: bold; text-transform: uppercase; }
+        .correct { background: var(--accent); color: white; border: none; }
+        .present { background: var(--misplaced); color: white; border: none; }
+        .absent { background: #eee; color: var(--dim); border: none; }
+
+        /* Memory Styles */
+        .memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .card { width: 60px; height: 80px; border: 1px solid var(--border); background: #eee; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; transition: background 0.2s; }
+        .card.flipped { background: white; }
+
+        .hidden { display: none; }
+        .back-btn { position: absolute; top: 1rem; right: 1rem; font-size: 0.8rem; color: var(--dim); border: none; }
+    </style>
+</head>
+<body>
+
+<div id="archive-container">
+    <div id="view-index">
+        <p class="vol">Exhibition No. 042 — Fall 2026</p>
+        <h1>Archive of Digital Iteration</h1>
+        <p class="preface">A curated survey of early binary logic. These artifacts explore the tension between human persistence and deterministic systems.</p>
+        
+        <ul class="exhibit-list">
+            <li class="exhibit-item"><span>01</span><a class="exhibit-link" onclick="App.load('snake')">Kinetic Geometry</a></li>
+            <li class="exhibit-item"><span>02</span><a class="exhibit-link" onclick="App.load('lexis')">Lexical Logic</a></li>
+            <li class="exhibit-item"><span>03</span><a class="exhibit-link" onclick="App.load('recall')">Visual Recall</a></li>
+        </ul>
+    </div>
+
+    <div id="view-game" class="hidden">
+        <button class="back-btn" onclick="App.home()">[ Close Exhibit ]</button>
+        <div id="game-meta">
+            <h2 id="game-title"></h2>
+            <p id="game-preface" class="preface"></p>
+        </div>
+        <div id="stage"></div>
+    </div>
+</div>
+
+<script>
+/**
+ * THE REGISTRY: State Management
+ */
+const Registry = {
+    record: JSON.parse(localStorage.getItem('archive_record')) || { snake: 0, lexis: 0, recall: 0 },
+    save() { localStorage.setItem('archive_record', JSON.stringify(this.record)); }
+};
+
+/**
+ * THE EXHIBITS
+ */
+const Games = {
+    // 01. SNAKE
+    snake: {
+        title: "Kinetic Geometry",
+        preface: "A study of spatial consumption. The entity grows upon interception of coordinates, eventually collapsing under its own complexity.",
+        init() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 400; canvas.height = 400;
+            const ctx = canvas.getContext('2d');
+            const box = 20;
+            let snake = [{x: 10 * box, y: 10 * box}];
+            let food = { x: Math.floor(Math.random()*19+1)*box, y: Math.floor(Math.random()*19+1)*box };
+            let d = 'RIGHT';
+            
+            document.addEventListener('keydown', e => {
+                if(e.keyCode == 37 && d != 'RIGHT') d = 'LEFT';
+                if(e.keyCode == 38 && d != 'DOWN') d = 'UP';
+                if(e.keyCode == 39 && d != 'LEFT') d = 'RIGHT';
+                if(e.keyCode == 40 && d != 'UP') d = 'DOWN';
+            });
+
+            const game = setInterval(() => {
+                ctx.fillStyle = "#fafafa"; ctx.fillRect(0,0,400,400);
+                for(let i=0; i<snake.length; i++){
+                    ctx.fillStyle = (i==0) ? "#1a1a1a" : "#737373";
+                    ctx.fillRect(snake[i].x, snake[i].y, box, box);
+                }
+                ctx.fillStyle = "#8c927d"; ctx.fillRect(food.x, food.y, box, box);
+
+                let headX = snake[0].x; let headY = snake[0].y;
+                if(d == 'LEFT') headX -= box; if(d == 'UP') headY -= box;
+                if(d == 'RIGHT') headX += box; if(d == 'DOWN') headY += box;
+
+                if(headX == food.x && headY == food.y) {
+                    food = { x: Math.floor(Math.random()*19+1)*box, y: Math.floor(Math.random()*19+1)*box };
+                } else { snake.pop(); }
+
+                let newHead = {x: headX, y: headY};
+                if(headX < 0 || headX >= 400 || headY < 0 || headY >= 400 || snake.some(s => s.x === headX && s.y === headY)) {
+                    clearInterval(game);
+                    if(snake.length > Registry.record.snake) { Registry.record.snake = snake.length; Registry.save(); }
+                }
+                snake.unshift(newHead);
+            }, 100);
+            return canvas;
+        }
+    },
+
+    // 02. WORDLE
+    lexis: {
+        title: "Lexical Logic",
+        preface: "An exercise in deductive linguistics. Five attempts to isolate a specific linguistic token.",
+        init() {
+            const container = document.createElement('div');
+            const target = "PAPER";
+            let currentGuess = "";
+            let row = 0;
+            const grid = document.createElement('div');
+            grid.className = "grid";
+            
+            for(let i=0; i<6; i++) {
+                const r = document.createElement('div');
+                r.className = "row";
+                for(let j=0; j<5; j++) {
+                    const t = document.createElement('div');
+                    t.className = "tile";
+                    r.appendChild(t);
+                }
+                grid.appendChild(r);
+            }
+
+            window.onkeydown = (e) => {
+                const tiles = grid.children[row].children;
+                if (e.key === "Enter" && currentGuess.length === 5) {
+                    [...currentGuess].forEach((char, i) => {
+                        if (char === target[i]) tiles[i].classList.add('correct');
+                        else if (target.includes(char)) tiles[i].classList.add('present');
+                        else tiles[i].classList.add('absent');
+                    });
+                    if (currentGuess === target) { Registry.record.lexis++; Registry.save(); window.onkeydown = null; }
+                    row++; currentGuess = "";
+                } else if (e.key === "Backspace") {
+                    currentGuess = currentGuess.slice(0, -1);
+                } else if (currentGuess.length < 5 && /^[a-zA-Z]$/.test(e.key)) {
+                    currentGuess += e.key.toUpperCase();
+                }
+                [...tiles].forEach((t, i) => t.textContent = currentGuess[i] || "");
+            };
+
+            container.appendChild(grid);
+            return container;
+        }
+    },
+
+    // 03. MEMORY
+    recall: {
+        title: "Visual Recall",
+        preface: "Mapping the spatial location of abstract symbols. A test of short-term cognitive persistence.",
+        init() {
+            const container = document.createElement('div');
+            container.className = "memory-grid";
+            const syms = ['†', '‡', '§', '¶', '◊', '∆', '†', '‡', '§', '¶', '◊', '∆'].sort(() => Math.random() - 0.5);
+            let flipped = [];
+            
+            syms.forEach((s, i) => {
+                const card = document.createElement('div');
+                card.className = "card";
+                card.dataset.val = s;
+                card.onclick = () => {
+                    if (flipped.length < 2 && !card.classList.contains('flipped')) {
+                        card.classList.add('flipped');
+                        card.textContent = s;
+                        flipped.push(card);
+                        if (flipped.length === 2) {
+                            if (flipped[0].dataset.val === flipped[1].dataset.val) {
+                                flipped = [];
+                            } else {
+                                setTimeout(() => {
+                                    flipped.forEach(c => { c.classList.remove('flipped'); c.textContent = ''; });
+                                    flipped = [];
+                                }, 700);
+                            }
+                        }
+                    }
+                };
+                container.appendChild(card);
+            });
+            return container;
+        }
+    }
+};
+
+/**
+ * APP CONTROLLER
+ */
+const App = {
+    load(id) {
+        document.getElementById('view-index').classList.add('hidden');
+        const view = document.getElementById('view-game');
+        view.classList.remove('hidden');
+        
+        const game = Games[id];
+        document.getElementById('game-title').textContent = game.title;
+        document.getElementById('game-preface').textContent = game.preface;
+        
+        const stage = document.getElementById('stage');
+        stage.innerHTML = '';
+        stage.appendChild(game.init());
+    },
+    home() {
+        window.onkeydown = null;
+        document.getElementById('view-index').classList.remove('hidden');
+        document.getElementById('view-game').classList.add('hidden');
+    }
+};
+</script>
+
+</body>
+</html>
