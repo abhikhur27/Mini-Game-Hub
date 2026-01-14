@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Archive of Digital Iteration</title>
+    <style>
+        :root {
+            --bg: #fdfcf8;
+            --ink: #1a1a1a;
+            --dim: #737373;
+            --accent: #8c927d; /* Sage */
+            --misplaced: #b5a48b; /* Ochre */
+            --border: #e5e5e5;
+            --font-serif: "Georgia", "Times New Roman", serif;
+            --font-mono: "Courier New", monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--ink);
+            font-family: var(--font-serif);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        #archive-container {
+            max-width: 800px;
+            width: 100%;
+            border: 1px solid var(--border);
+            padding: 3rem;
+            background: white;
+            position: relative;
+        }
+
+        /* Editorial Typography */
+        h1 { font-weight: normal; font-style: italic; font-size: 2.2rem; margin-bottom: 0.5rem; }
+        .vol { font-family: var(--font-mono); font-size: 0.8rem; text-transform: uppercase; color: var(--dim); letter-spacing: 2px; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
+        .preface { font-style: italic; color: var(--dim); margin-bottom: 2rem; max-width: 500px; font-size: 0.95rem; }
+        
+        button {
+            background: none;
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            font-family: var(--font-serif);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover { background: #f9f9f9; border-color: var(--dim); }
+
+        /* Navigation */
+        .exhibit-list { list-style: none; margin-top: 4rem; }
+        .exhibit-item { margin-bottom: 1.5rem; display: flex; align-items: baseline; }
+        .exhibit-item span { font-family: var(--font-mono); font-size:
