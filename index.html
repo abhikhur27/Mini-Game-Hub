@@ -57,6 +57,12 @@
         .hidden { display: none; }
         .back-btn { position: absolute; top: 1rem; right: 1rem; font-size: 0.8rem; color: var(--dim); border: none; cursor: pointer; }
         #restart-container { margin-top: 20px; }
+
+        /* Confetti */
+        .confetti { position: fixed; width: 10px; height: 10px; pointer-events: none; }
+        
+        /* Button Flash */
+        @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     </style>
 </head>
 <body>
@@ -97,6 +103,22 @@ const Registry = {
 };
 
 const Dictionary = ["PAPER", "LOGIC", "QUERY", "INDEX", "FRAME", "STATE", "INPUT", "RESET"];
+
+const createConfetti = () => {
+    for (let i = 0; i < 50; i++) {
+        const conf = document.createElement('div');
+        conf.className = 'confetti';
+        conf.style.left = Math.random() * 100 + '%';
+        conf.style.top = '-10px';
+        conf.style.background = ['var(--accent)', 'var(--misplaced)', '#d1d1d1', '#b5a48b'][Math.floor(Math.random() * 4)];
+        conf.style.animation = `fall ${2 + Math.random() * 1}s linear forwards`;
+        document.body.appendChild(conf);
+        setTimeout(() => conf.remove(), 3000);
+    }
+    const style = document.createElement('style');
+    style.textContent = `@keyframes fall { to { transform: translateY(${window.innerHeight}px) rotate(360deg); opacity: 0; } }`;
+    document.head.appendChild(style);
+};
 
 const Games = {
     snake: {
@@ -205,6 +227,7 @@ const Games = {
             const container = document.createElement('div'); container.className = "memory-grid";
             const syms = ['†', '‡', '§', '¶', '◊', '∆', '†', '‡', '§', '¶', '◊', '∆'].sort(() => Math.random() - 0.5);
             let flipped = [];
+            let matched = 0;
             syms.forEach(s => {
                 const card = document.createElement('div'); card.className = "card"; card.dataset.val = s;
                 card.onclick = () => {
@@ -213,7 +236,14 @@ const Games = {
                         if (flipped.length === 2) {
                             if (flipped[0].dataset.val !== flipped[1].dataset.val) {
                                 setTimeout(() => { flipped.forEach(c => { c.classList.remove('flipped'); c.textContent = ''; }); flipped = []; }, 800);
-                            } else { flipped = []; }
+                            } else { 
+                                matched++; 
+                                if (matched === 6) {
+                                    Registry.record.recall++; Registry.save();
+                                    setTimeout(createConfetti, 300);
+                                }
+                                flipped = []; 
+                            }
                         }
                     }
                 };
@@ -230,13 +260,23 @@ const Games = {
             const container = document.createElement('div'); container.style.display="flex"; container.style.gap="10px";
             let sequence = [], userIdx = 0;
             const btns = [];
+            const colors = ['#e8d5c4', '#d4c5b9', '#c0b0ad', '#aca399'];
             for(let i=0; i<4; i++) {
                 const b = document.createElement('div');
                 b.style.width="80px"; b.style.height="80px"; b.style.border="1px solid var(--border)";
-                b.style.cursor="pointer";
+                b.style.cursor="pointer"; b.style.background = colors[i]; b.style.transition = "all 0.1s";
                 b.onclick = () => handleInput(i);
                 btns.push(b); container.appendChild(b);
             }
+
+            const flashButton = (idx) => {
+                btns[idx].style.opacity = "0.5";
+                btns[idx].style.transform = "scale(0.95)";
+                setTimeout(() => {
+                    btns[idx].style.opacity = "1";
+                    btns[idx].style.transform = "scale(1)";
+                }, 150);
+            };
 
             const playSequence = async () => {
                 userIdx = 0;
@@ -244,11 +284,12 @@ const Games = {
                     await new Promise(r => setTimeout(r, 400));
                     btns[s].style.background = "var(--accent)";
                     await new Promise(r => setTimeout(r, 400));
-                    btns[s].style.background = "none";
+                    btns[s].style.background = colors[s];
                 }
             };
 
             const handleInput = (i) => {
+                flashButton(i);
                 if(i === sequence[userIdx]) {
                     userIdx++;
                     if(userIdx === sequence.length) {
