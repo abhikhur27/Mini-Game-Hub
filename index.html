@@ -3,67 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Archive of Digital Iteration</title>
+    <title>The Archive of Digital Game Iterations</title>
     <style>
         :root {
             --bg: #fdfcf8;
             --ink: #1a1a1a;
             --dim: #737373;
-            --accent: #8c927d; /* Sage */
-            --misplaced: #b5a48b; /* Ochre */
+            --accent: #8c927d;
+            --misplaced: #b5a48b;
             --border: #e5e5e5;
             --font-serif: "Georgia", "Times New Roman", serif;
             --font-mono: "Courier New", monospace;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: var(--bg); color: var(--ink); font-family: var(--font-serif); display: flex; justify-content: center; min-height: 100vh; padding: 2rem; }
+        
+        #archive-container { max-width: 800px; width: 100%; border: 1px solid var(--border); padding: 3rem; background: white; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
 
-        body {
-            background-color: var(--bg);
-            color: var(--ink);
-            font-family: var(--font-serif);
-            line-height: 1.6;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 2rem;
-        }
-
-        #archive-container {
-            max-width: 800px;
-            width: 100%;
-            border: 1px solid var(--border);
-            padding: 3rem;
-            background: white;
-            position: relative;
-        }
-
-        /* Editorial Typography */
         h1 { font-weight: normal; font-style: italic; font-size: 2.2rem; margin-bottom: 0.5rem; }
         .vol { font-family: var(--font-mono); font-size: 0.8rem; text-transform: uppercase; color: var(--dim); letter-spacing: 2px; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
-        .preface { font-style: italic; color: var(--dim); margin-bottom: 2rem; max-width: 500px; font-size: 0.95rem; }
+        .preface { font-style: italic; color: var(--dim); margin-bottom: 2rem; max-width: 500px; font-size: 0.95rem; line-height: 1.6; }
         
-        button {
-            background: none;
-            border: 1px solid var(--border);
-            padding: 0.5rem 1rem;
-            font-family: var(--font-serif);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
+        button { background: none; border: 1px solid var(--border); padding: 0.5rem 1rem; font-family: var(--font-serif); cursor: pointer; transition: all 0.2s; }
         button:hover { background: #f9f9f9; border-color: var(--dim); }
 
-        /* Navigation */
         .exhibit-list { list-style: none; margin-top: 4rem; }
         .exhibit-item { margin-bottom: 1.5rem; display: flex; align-items: baseline; }
         .exhibit-item span { font-family: var(--font-mono); font-size: 0.7rem; margin-right: 1rem; color: var(--dim); }
         .exhibit-link { text-decoration: none; color: var(--ink); font-size: 1.2rem; border-bottom: 1px transparent solid; cursor: pointer; }
         .exhibit-link:hover { border-bottom: 1px solid var(--ink); }
 
-        /* Game Areas */
-        #stage { margin-top: 2rem; display: flex; flex-direction: column; align-items: center; }
-        canvas { border: 1px solid var(--border); background: #fafafa; max-width: 100%; }
+        footer { margin-top: 5rem; font-size: 0.8rem; border-top: 1px solid var(--border); padding-top: 1rem; }
+        footer a { color: var(--dim); text-decoration: none; font-style: italic; }
+        footer a:hover { color: var(--ink); text-decoration: underline; }
+
+        #stage { margin-top: 2rem; display: flex; flex-direction: column; align-items: center; min-height: 450px; }
+        canvas { border: 1px solid var(--border); background: #fafafa; }
         
         /* Wordle Styles */
         .grid { display: grid; gap: 5px; margin-top: 1rem; }
@@ -75,122 +51,132 @@
 
         /* Memory Styles */
         .memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .card { width: 60px; height: 80px; border: 1px solid var(--border); background: #eee; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; transition: background 0.2s; }
-        .card.flipped { background: white; }
+        .card { width: 70px; height: 90px; border: 1px solid var(--border); background: #f0f0f0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .card.flipped { background: white; border-color: var(--ink); }
 
         .hidden { display: none; }
-        .back-btn { position: absolute; top: 1rem; right: 1rem; font-size: 0.8rem; color: var(--dim); border: none; }
+        .back-btn { position: absolute; top: 1rem; right: 1rem; font-size: 0.8rem; color: var(--dim); border: none; cursor: pointer; }
+        #restart-container { margin-top: 20px; }
     </style>
 </head>
 <body>
 
 <div id="archive-container">
     <div id="view-index">
-        <p class="vol">Exhibition No. 042 — Fall 2026</p>
+        <p class="vol">Digital Archive — Accession 2026</p>
         <h1>Archive of Digital Iteration</h1>
-        <p class="preface">A curated survey of early binary logic. These artifacts explore the tension between human persistence and deterministic systems.</p>
+        <p class="preface">A curated examination of deterministic logic. These exhibits strip away contemporary stimuli to focus on core systemic behaviors.</p>
         
         <ul class="exhibit-list">
             <li class="exhibit-item"><span>01</span><a class="exhibit-link" onclick="App.load('snake')">Kinetic Geometry</a></li>
             <li class="exhibit-item"><span>02</span><a class="exhibit-link" onclick="App.load('lexis')">Lexical Logic</a></li>
             <li class="exhibit-item"><span>03</span><a class="exhibit-link" onclick="App.load('recall')">Visual Recall</a></li>
+            <li class="exhibit-item"><span>04</span><a class="exhibit-link" onclick="App.load('binary')">Binary Sequence</a></li>
         </ul>
+
+        <footer>
+            <a href="https://abhikhur27.github.io" target="_blank">View Curator’s Portfolio: abhikhur27.github.io</a>
+        </footer>
     </div>
 
     <div id="view-game" class="hidden">
-        <button class="back-btn" onclick="App.home()">[ Close Exhibit ]</button>
+        <button class="back-btn" onclick="App.home()">[ Return to Archive ]</button>
         <div id="game-meta">
             <h2 id="game-title"></h2>
             <p id="game-preface" class="preface"></p>
         </div>
         <div id="stage"></div>
+        <div id="restart-container"></div>
     </div>
 </div>
 
 <script>
-/**
- * THE REGISTRY: State Management
- */
 const Registry = {
-    record: JSON.parse(localStorage.getItem('archive_record')) || { snake: 0, lexis: 0, recall: 0 },
+    record: JSON.parse(localStorage.getItem('archive_record')) || { snake: 0, lexis: 0, recall: 0, binary: 0 },
     save() { localStorage.setItem('archive_record', JSON.stringify(this.record)); }
 };
 
-/**
- * THE EXHIBITS
- */
+const Dictionary = ["PAPER", "LOGIC", "QUERY", "INDEX", "FRAME", "STATE", "INPUT", "RESET"];
+
 const Games = {
-    // 01. SNAKE
     snake: {
-        title: "Kinetic Geometry",
-        preface: "A study of spatial consumption. The entity grows upon interception of coordinates, eventually collapsing under its own complexity.",
+        title: "01. Kinetic Geometry (AKA Snake)",
+        preface: "Observations in growth and spatial limitation. The line expands upon contact with the point, eventually colliding with its own past.",
         init() {
             const canvas = document.createElement('canvas');
-            canvas.width = 400; canvas.height = 400;
+            canvas.width = 300; canvas.height = 300;
             const ctx = canvas.getContext('2d');
-            const box = 20;
-            let snake = [{x: 10 * box, y: 10 * box}];
-            let food = { x: Math.floor(Math.random()*19+1)*box, y: Math.floor(Math.random()*19+1)*box };
-            let d = 'RIGHT';
-            
-            document.addEventListener('keydown', e => {
-                if(e.keyCode == 37 && d != 'RIGHT') d = 'LEFT';
-                if(e.keyCode == 38 && d != 'DOWN') d = 'UP';
-                if(e.keyCode == 39 && d != 'LEFT') d = 'RIGHT';
-                if(e.keyCode == 40 && d != 'UP') d = 'DOWN';
-            });
+            const box = 15;
+            let snake, food, d, gameLoop;
 
-            const game = setInterval(() => {
-                ctx.fillStyle = "#fafafa"; ctx.fillRect(0,0,400,400);
+            const reset = () => {
+                snake = [{x: 10 * box, y: 10 * box}];
+                food = { x: Math.floor(Math.random()*19)*box, y: Math.floor(Math.random()*19)*box };
+                d = 'RIGHT';
+                if(gameLoop) clearInterval(gameLoop);
+                gameLoop = setInterval(draw, 120);
+                document.getElementById('restart-container').innerHTML = '';
+            };
+
+            const draw = () => {
+                ctx.fillStyle = "#fafafa"; ctx.fillRect(0,0,300,300);
                 for(let i=0; i<snake.length; i++){
-                    ctx.fillStyle = (i==0) ? "#1a1a1a" : "#737373";
-                    ctx.fillRect(snake[i].x, snake[i].y, box, box);
+                    ctx.fillStyle = (i==0) ? "#1a1a1a" : "#d1d1d1";
+                    ctx.fillRect(snake[i].x, snake[i].y, box-1, box-1);
                 }
-                ctx.fillStyle = "#8c927d"; ctx.fillRect(food.x, food.y, box, box);
+                ctx.fillStyle = "#8c927d"; ctx.fillRect(food.x, food.y, box-1, box-1);
 
-                let headX = snake[0].x; let headY = snake[0].y;
-                if(d == 'LEFT') headX -= box; if(d == 'UP') headY -= box;
-                if(d == 'RIGHT') headX += box; if(d == 'DOWN') headY += box;
+                let hX = snake[0].x, hY = snake[0].y;
+                if(d == 'LEFT') hX -= box; if(d == 'UP') hY -= box;
+                if(d == 'RIGHT') hX += box; if(d == 'DOWN') hY += box;
 
-                if(headX == food.x && headY == food.y) {
-                    food = { x: Math.floor(Math.random()*19+1)*box, y: Math.floor(Math.random()*19+1)*box };
+                if(hX == food.x && hY == food.y) {
+                    food = { x: Math.floor(Math.random()*19)*box, y: Math.floor(Math.random()*19)*box };
                 } else { snake.pop(); }
 
-                let newHead = {x: headX, y: headY};
-                if(headX < 0 || headX >= 400 || headY < 0 || headY >= 400 || snake.some(s => s.x === headX && s.y === headY)) {
-                    clearInterval(game);
+                let nH = {x: hX, y: hY};
+                if(hX < 0 || hX >= 300 || hY < 0 || hY >= 300 || snake.some(s => s.x === hX && s.y === hY)) {
+                    clearInterval(gameLoop);
+                    const btn = document.createElement('button');
+                    btn.textContent = "Begin New Iteration";
+                    btn.onclick = reset;
+                    document.getElementById('restart-container').appendChild(btn);
                     if(snake.length > Registry.record.snake) { Registry.record.snake = snake.length; Registry.save(); }
+                    return;
                 }
-                snake.unshift(newHead);
-            }, 100);
+                snake.unshift(nH);
+            };
+
+            window.onkeydown = e => {
+                if(e.key == "ArrowLeft" && d != 'RIGHT') d = 'LEFT';
+                if(e.key == "ArrowUp" && d != 'DOWN') d = 'UP';
+                if(e.key == "ArrowRight" && d != 'LEFT') d = 'RIGHT';
+                if(e.key == "ArrowDown" && d != 'UP') d = 'DOWN';
+            };
+            reset();
             return canvas;
         }
     },
 
-    // 02. WORDLE
     lexis: {
-        title: "Lexical Logic",
-        preface: "An exercise in deductive linguistics. Five attempts to isolate a specific linguistic token.",
+        title: "02. Lexical Logic AKA Wordle",
+        preface: "Identify the hidden five-character token. Each row represents a memory persistent record of a previous attempt.",
         init() {
             const container = document.createElement('div');
-            const target = "PAPER";
-            let currentGuess = "";
-            let row = 0;
-            const grid = document.createElement('div');
-            grid.className = "grid";
+            const target = Dictionary[Math.floor(Math.random()*Dictionary.length)];
+            let currentGuess = "", row = 0;
+            const grid = document.createElement('div'); grid.className = "grid";
             
             for(let i=0; i<6; i++) {
-                const r = document.createElement('div');
-                r.className = "row";
+                const r = document.createElement('div'); r.className = "row";
                 for(let j=0; j<5; j++) {
-                    const t = document.createElement('div');
-                    t.className = "tile";
-                    r.appendChild(t);
+                    const t = document.createElement('div'); t.className = "tile"; r.appendChild(t);
                 }
                 grid.appendChild(r);
             }
 
             window.onkeydown = (e) => {
+                if (row >= 6) return;
                 const tiles = grid.children[row].children;
                 if (e.key === "Enter" && currentGuess.length === 5) {
                     [...currentGuess].forEach((char, i) => {
@@ -198,7 +184,7 @@ const Games = {
                         else if (target.includes(char)) tiles[i].classList.add('present');
                         else tiles[i].classList.add('absent');
                     });
-                    if (currentGuess === target) { Registry.record.lexis++; Registry.save(); window.onkeydown = null; }
+                    if (currentGuess === target) { Registry.record.lexis++; Registry.save(); }
                     row++; currentGuess = "";
                 } else if (e.key === "Backspace") {
                     currentGuess = currentGuess.slice(0, -1);
@@ -207,40 +193,27 @@ const Games = {
                 }
                 [...tiles].forEach((t, i) => t.textContent = currentGuess[i] || "");
             };
-
             container.appendChild(grid);
             return container;
         }
     },
 
-    // 03. MEMORY
     recall: {
-        title: "Visual Recall",
-        preface: "Mapping the spatial location of abstract symbols. A test of short-term cognitive persistence.",
+        title: "03. Visual Recall",
+        preface: "A study in short-term memory through the pairing of various glyphs.",
         init() {
-            const container = document.createElement('div');
-            container.className = "memory-grid";
+            const container = document.createElement('div'); container.className = "memory-grid";
             const syms = ['†', '‡', '§', '¶', '◊', '∆', '†', '‡', '§', '¶', '◊', '∆'].sort(() => Math.random() - 0.5);
             let flipped = [];
-            
-            syms.forEach((s, i) => {
-                const card = document.createElement('div');
-                card.className = "card";
-                card.dataset.val = s;
+            syms.forEach(s => {
+                const card = document.createElement('div'); card.className = "card"; card.dataset.val = s;
                 card.onclick = () => {
                     if (flipped.length < 2 && !card.classList.contains('flipped')) {
-                        card.classList.add('flipped');
-                        card.textContent = s;
-                        flipped.push(card);
+                        card.classList.add('flipped'); card.textContent = s; flipped.push(card);
                         if (flipped.length === 2) {
-                            if (flipped[0].dataset.val === flipped[1].dataset.val) {
-                                flipped = [];
-                            } else {
-                                setTimeout(() => {
-                                    flipped.forEach(c => { c.classList.remove('flipped'); c.textContent = ''; });
-                                    flipped = [];
-                                }, 700);
-                            }
+                            if (flipped[0].dataset.val !== flipped[1].dataset.val) {
+                                setTimeout(() => { flipped.forEach(c => { c.classList.remove('flipped'); c.textContent = ''; }); flipped = []; }, 800);
+                            } else { flipped = []; }
                         }
                     }
                 };
@@ -248,33 +221,70 @@ const Games = {
             });
             return container;
         }
+    },
+
+    binary: {
+        title: "04. Binary Sequence",
+        preface: "Observe the pattern and replicate. ",
+        init() {
+            const container = document.createElement('div'); container.style.display="flex"; container.style.gap="10px";
+            let sequence = [], userIdx = 0;
+            const btns = [];
+            for(let i=0; i<4; i++) {
+                const b = document.createElement('div');
+                b.style.width="80px"; b.style.height="80px"; b.style.border="1px solid var(--border)";
+                b.style.cursor="pointer";
+                b.onclick = () => handleInput(i);
+                btns.push(b); container.appendChild(b);
+            }
+
+            const playSequence = async () => {
+                userIdx = 0;
+                for(let s of sequence) {
+                    await new Promise(r => setTimeout(r, 400));
+                    btns[s].style.background = "var(--accent)";
+                    await new Promise(r => setTimeout(r, 400));
+                    btns[s].style.background = "none";
+                }
+            };
+
+            const handleInput = (i) => {
+                if(i === sequence[userIdx]) {
+                    userIdx++;
+                    if(userIdx === sequence.length) {
+                        sequence.push(Math.floor(Math.random()*4));
+                        setTimeout(playSequence, 800);
+                    }
+                } else {
+                    sequence = [Math.floor(Math.random()*4)];
+                    playSequence();
+                }
+            };
+
+            sequence.push(Math.floor(Math.random()*4));
+            setTimeout(playSequence, 500);
+            return container;
+        }
     }
 };
 
-/**
- * APP CONTROLLER
- */
 const App = {
     load(id) {
         document.getElementById('view-index').classList.add('hidden');
-        const view = document.getElementById('view-game');
-        view.classList.remove('hidden');
-        
+        document.getElementById('view-game').classList.remove('hidden');
         const game = Games[id];
         document.getElementById('game-title').textContent = game.title;
         document.getElementById('game-preface').textContent = game.preface;
-        
         const stage = document.getElementById('stage');
-        stage.innerHTML = '';
-        stage.appendChild(game.init());
+        stage.innerHTML = ''; stage.appendChild(game.init());
     },
     home() {
         window.onkeydown = null;
+        document.getElementById('restart-container').innerHTML = '';
         document.getElementById('view-index').classList.remove('hidden');
         document.getElementById('view-game').classList.add('hidden');
     }
 };
 </script>
-
 </body>
 </html>
