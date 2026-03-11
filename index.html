@@ -1,331 +1,49 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Archive of Digital Game Iterations</title>
-    <style>
-        :root {
-            --bg: #fdfcf8;
-            --ink: #1a1a1a;
-            --dim: #737373;
-            --accent: #8c927d;
-            --misplaced: #b5a48b;
-            --border: #e5e5e5;
-            --font-serif: "Georgia", "Times New Roman", serif;
-            --font-mono: "Courier New", monospace;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background-color: var(--bg); color: var(--ink); font-family: var(--font-serif); display: flex; justify-content: center; min-height: 100vh; padding: 2rem; }
-        
-        #archive-container { max-width: 800px; width: 100%; border: 1px solid var(--border); padding: 3rem; background: white; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
-
-        h1 { font-weight: normal; font-style: italic; font-size: 2.2rem; margin-bottom: 0.5rem; }
-        .vol { font-family: var(--font-mono); font-size: 0.8rem; text-transform: uppercase; color: var(--dim); letter-spacing: 2px; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem; }
-        .preface { font-style: italic; color: var(--dim); margin-bottom: 2rem; max-width: 500px; font-size: 0.95rem; line-height: 1.6; }
-        
-        button { background: none; border: 1px solid var(--border); padding: 0.5rem 1rem; font-family: var(--font-serif); cursor: pointer; transition: all 0.2s; }
-        button:hover { background: #f9f9f9; border-color: var(--dim); }
-
-        .exhibit-list { list-style: none; margin-top: 4rem; }
-        .exhibit-item { margin-bottom: 1.5rem; display: flex; align-items: baseline; }
-        .exhibit-item span { font-family: var(--font-mono); font-size: 0.7rem; margin-right: 1rem; color: var(--dim); }
-        .exhibit-link { text-decoration: none; color: var(--ink); font-size: 1.2rem; border-bottom: 1px transparent solid; cursor: pointer; }
-        .exhibit-link:hover { border-bottom: 1px solid var(--ink); }
-
-        footer { margin-top: 5rem; font-size: 0.8rem; border-top: 1px solid var(--border); padding-top: 1rem; }
-        footer a { color: var(--dim); text-decoration: none; font-style: italic; }
-        footer a:hover { color: var(--ink); text-decoration: underline; }
-
-        #stage { margin-top: 2rem; display: flex; flex-direction: column; align-items: center; min-height: 450px; }
-        canvas { border: 1px solid var(--border); background: #fafafa; }
-        
-        /* Wordle Styles */
-        .grid { display: grid; gap: 5px; margin-top: 1rem; }
-        .row { display: flex; gap: 5px; }
-        .tile { width: 45px; height: 45px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-weight: bold; text-transform: uppercase; }
-        .correct { background: var(--accent); color: white; border: none; }
-        .present { background: var(--misplaced); color: white; border: none; }
-        .absent { background: #eee; color: var(--dim); border: none; }
-
-        /* Memory Styles */
-        .memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .card { width: 70px; height: 90px; border: 1px solid var(--border); background: #f0f0f0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
-        .card.flipped { background: white; border-color: var(--ink); }
-
-        .hidden { display: none; }
-        .back-btn { position: absolute; top: 1rem; right: 1rem; font-size: 0.8rem; color: var(--dim); border: none; cursor: pointer; }
-        #restart-container { margin-top: 20px; }
-
-        /* Confetti */
-        .confetti { position: fixed; width: 10px; height: 10px; pointer-events: none; }
-        
-        /* Button Flash */
-        @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini Game Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <header class="container header">
+    <a class="back-link" href="https://abhikhur27.github.io/" target="_blank" rel="noreferrer">Back to Portfolio</a>
+    <h1>Mini Game Hub</h1>
+    <p>Arcade-style browser games focused on logic, reaction speed, and memory.</p>
+  </header>
 
-<div id="archive-container">
-    <div id="view-index">
-        <p class="vol">Digital Archive — October 2025</p>
-        <h1>Archive of Digital Game Iterations</h1>
-        <p class="preface">A curation of various logic games. These exhibits strip away any bloatware to focus on core  behaviors.</p>
-        
-        <ul class="exhibit-list">
-            <li class="exhibit-item"><span>01</span><a class="exhibit-link" onclick="App.load('snake')">Kinetic Geometry (AKA Snake)</a></li>
-            <li class="exhibit-item"><span>02</span><a class="exhibit-link" onclick="App.load('lexis')">Lexical Logic (AKA Wordle)</a></li>
-            <li class="exhibit-item"><span>03</span><a class="exhibit-link" onclick="App.load('recall')">Visual Recall</a></li>
-            <li class="exhibit-item"><span>04</span><a class="exhibit-link" onclick="App.load('binary')">Binary Sequence</a></li>
-        </ul>
+  <main class="container layout">
+    <section class="panel sidebar">
+      <h2>Games</h2>
+      <div class="tab-list" role="tablist">
+        <button class="tab active" data-game="reaction">Reaction Timer</button>
+        <button class="tab" data-game="memory">Memory Match</button>
+        <button class="tab" data-game="sequence">Sequence Recall</button>
+      </div>
 
-        <footer>
-            <a href="https://abhikhur27.github.io" target="_blank">View Curator’s Portfolio: abhikhur27.github.io</a>
-        </footer>
-    </div>
+      <h2>Scoreboard</h2>
+      <ul class="score-list">
+        <li>Best Reaction: <span id="best-reaction">-</span></li>
+        <li>Memory Wins: <span id="memory-wins">0</span></li>
+        <li>Best Sequence: <span id="best-sequence">0</span></li>
+      </ul>
 
-    <div id="view-game" class="hidden">
-        <button class="back-btn" onclick="App.home()">[ Return to Archive ]</button>
-        <div id="game-meta">
-            <h2 id="game-title"></h2>
-            <p id="game-preface" class="preface"></p>
-        </div>
-        <div id="stage"></div>
-        <div id="restart-container"></div>
-    </div>
-</div>
+      <p class="small">Scores are saved in your browser storage.</p>
+    </section>
 
-<script>
-const Registry = {
-    record: JSON.parse(localStorage.getItem('archive_record')) || { snake: 0, lexis: 0, recall: 0, binary: 0 },
-    save() { localStorage.setItem('archive_record', JSON.stringify(this.record)); }
-};
+    <section class="panel stage-panel">
+      <div class="stage-head">
+        <h2 id="game-title">Reaction Timer</h2>
+        <p id="game-note">Click as soon as the panel turns green.</p>
+      </div>
+      <div id="stage" class="stage"></div>
+    </section>
+  </main>
 
-const Dictionary = ["PAPER", "LOGIC", "QUERY", "INDEX", "FRAME", "STATE", "INPUT", "RESET"];
-
-const createConfetti = () => {
-    for (let i = 0; i < 50; i++) {
-        const conf = document.createElement('div');
-        conf.className = 'confetti';
-        conf.style.left = Math.random() * 100 + '%';
-        conf.style.top = '-10px';
-        conf.style.background = ['var(--accent)', 'var(--misplaced)', '#d1d1d1', '#b5a48b'][Math.floor(Math.random() * 4)];
-        conf.style.animation = `fall ${2 + Math.random() * 1}s linear forwards`;
-        document.body.appendChild(conf);
-        setTimeout(() => conf.remove(), 3000);
-    }
-    const style = document.createElement('style');
-    style.textContent = `@keyframes fall { to { transform: translateY(${window.innerHeight}px) rotate(360deg); opacity: 0; } }`;
-    document.head.appendChild(style);
-};
-
-const Games = {
-    snake: {
-        title: "01. Kinetic Geometry (AKA Snake)",
-        preface: "Observations in growth and spatial limitation. The line expands upon contact with the point, eventually colliding with its own past.",
-        init() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 300; canvas.height = 300;
-            const ctx = canvas.getContext('2d');
-            const box = 15;
-            let snake, food, d, gameLoop;
-
-            const reset = () => {
-                snake = [{x: 10 * box, y: 10 * box}];
-                food = { x: Math.floor(Math.random()*19)*box, y: Math.floor(Math.random()*19)*box };
-                d = 'RIGHT';
-                if(gameLoop) clearInterval(gameLoop);
-                gameLoop = setInterval(draw, 120);
-                document.getElementById('restart-container').innerHTML = '';
-            };
-
-            const draw = () => {
-                ctx.fillStyle = "#fafafa"; ctx.fillRect(0,0,300,300);
-                for(let i=0; i<snake.length; i++){
-                    ctx.fillStyle = (i==0) ? "#1a1a1a" : "#d1d1d1";
-                    ctx.fillRect(snake[i].x, snake[i].y, box-1, box-1);
-                }
-                ctx.fillStyle = "#8c927d"; ctx.fillRect(food.x, food.y, box-1, box-1);
-
-                let hX = snake[0].x, hY = snake[0].y;
-                if(d == 'LEFT') hX -= box; if(d == 'UP') hY -= box;
-                if(d == 'RIGHT') hX += box; if(d == 'DOWN') hY += box;
-
-                if(hX == food.x && hY == food.y) {
-                    food = { x: Math.floor(Math.random()*19)*box, y: Math.floor(Math.random()*19)*box };
-                } else { snake.pop(); }
-
-                let nH = {x: hX, y: hY};
-                if(hX < 0 || hX >= 300 || hY < 0 || hY >= 300 || snake.some(s => s.x === hX && s.y === hY)) {
-                    clearInterval(gameLoop);
-                    const btn = document.createElement('button');
-                    btn.textContent = "Begin New Iteration";
-                    btn.onclick = reset;
-                    document.getElementById('restart-container').appendChild(btn);
-                    if(snake.length > Registry.record.snake) { Registry.record.snake = snake.length; Registry.save(); }
-                    return;
-                }
-                snake.unshift(nH);
-            };
-
-            window.onkeydown = e => {
-                if(e.key == "ArrowLeft" && d != 'RIGHT') d = 'LEFT';
-                if(e.key == "ArrowUp" && d != 'DOWN') d = 'UP';
-                if(e.key == "ArrowRight" && d != 'LEFT') d = 'RIGHT';
-                if(e.key == "ArrowDown" && d != 'UP') d = 'DOWN';
-            };
-            reset();
-            return canvas;
-        }
-    },
-
-    lexis: {
-        title: "02. Lexical Logic AKA Wordle",
-        preface: "Identify the hidden five-character token. Each row represents a memory persistent record of a previous attempt.",
-        init() {
-            const container = document.createElement('div');
-            const target = Dictionary[Math.floor(Math.random()*Dictionary.length)];
-            let currentGuess = "", row = 0;
-            const grid = document.createElement('div'); grid.className = "grid";
-            
-            for(let i=0; i<6; i++) {
-                const r = document.createElement('div'); r.className = "row";
-                for(let j=0; j<5; j++) {
-                    const t = document.createElement('div'); t.className = "tile"; r.appendChild(t);
-                }
-                grid.appendChild(r);
-            }
-
-            window.onkeydown = (e) => {
-                if (row >= 6) return;
-                const tiles = grid.children[row].children;
-                if (e.key === "Enter" && currentGuess.length === 5) {
-                    [...currentGuess].forEach((char, i) => {
-                        if (char === target[i]) tiles[i].classList.add('correct');
-                        else if (target.includes(char)) tiles[i].classList.add('present');
-                        else tiles[i].classList.add('absent');
-                    });
-                    if (currentGuess === target) { Registry.record.lexis++; Registry.save(); }
-                    row++; currentGuess = "";
-                } else if (e.key === "Backspace") {
-                    currentGuess = currentGuess.slice(0, -1);
-                } else if (currentGuess.length < 5 && /^[a-zA-Z]$/.test(e.key)) {
-                    currentGuess += e.key.toUpperCase();
-                }
-                [...tiles].forEach((t, i) => t.textContent = currentGuess[i] || "");
-            };
-            container.appendChild(grid);
-            return container;
-        }
-    },
-
-    recall: {
-        title: "03. Visual Recall",
-        preface: "A study in short-term memory through the pairing of various glyphs.",
-        init() {
-            const container = document.createElement('div'); container.className = "memory-grid";
-            const syms = ['†', '‡', '§', '¶', '◊', '∆', '†', '‡', '§', '¶', '◊', '∆'].sort(() => Math.random() - 0.5);
-            let flipped = [];
-            let matched = 0;
-            syms.forEach(s => {
-                const card = document.createElement('div'); card.className = "card"; card.dataset.val = s;
-                card.onclick = () => {
-                    if (flipped.length < 2 && !card.classList.contains('flipped')) {
-                        card.classList.add('flipped'); card.textContent = s; flipped.push(card);
-                        if (flipped.length === 2) {
-                            if (flipped[0].dataset.val !== flipped[1].dataset.val) {
-                                setTimeout(() => { flipped.forEach(c => { c.classList.remove('flipped'); c.textContent = ''; }); flipped = []; }, 800);
-                            } else { 
-                                matched++; 
-                                if (matched === 6) {
-                                    Registry.record.recall++; Registry.save();
-                                    setTimeout(createConfetti, 300);
-                                }
-                                flipped = []; 
-                            }
-                        }
-                    }
-                };
-                container.appendChild(card);
-            });
-            return container;
-        }
-    },
-
-    binary: {
-        title: "04. Binary Sequence",
-        preface: "Observe the pattern and replicate. ",
-        init() {
-            const container = document.createElement('div'); container.style.display="flex"; container.style.gap="10px";
-            let sequence = [], userIdx = 0;
-            const btns = [];
-            const colors = ['#e8d5c4', '#d4c5b9', '#c0b0ad', '#aca399'];
-            for(let i=0; i<4; i++) {
-                const b = document.createElement('div');
-                b.style.width="80px"; b.style.height="80px"; b.style.border="1px solid var(--border)";
-                b.style.cursor="pointer"; b.style.background = colors[i]; b.style.transition = "all 0.1s";
-                b.onclick = () => handleInput(i);
-                btns.push(b); container.appendChild(b);
-            }
-
-            const flashButton = (idx) => {
-                btns[idx].style.opacity = "0.5";
-                btns[idx].style.transform = "scale(0.95)";
-                setTimeout(() => {
-                    btns[idx].style.opacity = "1";
-                    btns[idx].style.transform = "scale(1)";
-                }, 150);
-            };
-
-            const playSequence = async () => {
-                userIdx = 0;
-                for(let s of sequence) {
-                    await new Promise(r => setTimeout(r, 400));
-                    btns[s].style.background = "var(--accent)";
-                    await new Promise(r => setTimeout(r, 400));
-                    btns[s].style.background = colors[s];
-                }
-            };
-
-            const handleInput = (i) => {
-                flashButton(i);
-                if(i === sequence[userIdx]) {
-                    userIdx++;
-                    if(userIdx === sequence.length) {
-                        sequence.push(Math.floor(Math.random()*4));
-                        setTimeout(playSequence, 800);
-                    }
-                } else {
-                    sequence = [Math.floor(Math.random()*4)];
-                    playSequence();
-                }
-            };
-
-            sequence.push(Math.floor(Math.random()*4));
-            setTimeout(playSequence, 500);
-            return container;
-        }
-    }
-};
-
-const App = {
-    load(id) {
-        document.getElementById('view-index').classList.add('hidden');
-        document.getElementById('view-game').classList.remove('hidden');
-        const game = Games[id];
-        document.getElementById('game-title').textContent = game.title;
-        document.getElementById('game-preface').textContent = game.preface;
-        const stage = document.getElementById('stage');
-        stage.innerHTML = ''; stage.appendChild(game.init());
-    },
-    home() {
-        window.onkeydown = null;
-        document.getElementById('restart-container').innerHTML = '';
-        document.getElementById('view-index').classList.remove('hidden');
-        document.getElementById('view-game').classList.add('hidden');
-    }
-};
-</script>
+  <script src="script.js"></script>
 </body>
 </html>

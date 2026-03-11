@@ -1,0 +1,52 @@
+# Mini Game Hub
+
+Portfolio-grade browser arcade featuring three interactive games and persistent scores.
+
+## Included Games
+
+1. **Reaction Timer**
+   - Randomized start signal.
+   - Early-click penalty handling.
+   - Best reaction time tracking.
+
+2. **Memory Match**
+   - Pair matching with randomized board.
+   - Win detection and win counter.
+
+3. **Sequence Recall**
+   - Simon-style increasing pattern challenge.
+   - Best completed round tracking.
+
+## Technical Design
+
+- `index.html`: shell layout + game tabs + scoreboard.
+- `styles.css`: responsive arcade UI and reusable component styles.
+- `script.js`: modular game mounts with cleanup hooks and localStorage persistence.
+
+```mermaid
+flowchart TD
+  A[Tab Selection] --> B[Mount Game Module]
+  B --> C[Game State + UI Events]
+  C --> D[Score Updates]
+  D --> E[localStorage]
+```
+
+## Local Run
+
+```bash
+python -m http.server 8000
+```
+
+Open `http://localhost:8000`.
+
+## GitHub Pages Compatibility
+
+- Static-only deployment.
+- No build tools required.
+- Publish repository root.
+
+## Future Improvements
+
+- Add difficulty presets per game.
+- Add shared achievements system.
+- Add keyboard controls and high-score leaderboard export.
