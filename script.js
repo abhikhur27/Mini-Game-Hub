@@ -22,7 +22,7 @@ const gameMeta = {
   },
   sequence: {
     title: 'Sequence Recall',
-    note: 'Repeat an increasingly long sequence of colored pads.',
+    note: 'Repeat an increasingly long sequence of colored pads (use 1-4 or Q/W/A/S keys).',
   },
   pattern: {
     title: 'Pattern Sprint',
@@ -361,6 +361,16 @@ function mountSequenceGame() {
   const roundEl = document.getElementById('sequence-round');
   const messageEl = document.getElementById('sequence-message');
   const pads = Array.from(document.querySelectorAll('.pad'));
+  const keyMap = {
+    '1': 0,
+    '2': 1,
+    '3': 2,
+    '4': 3,
+    q: 0,
+    w: 1,
+    a: 2,
+    s: 3,
+  };
 
   let timeouts = [];
   let sequence = [];
@@ -451,6 +461,16 @@ function mountSequenceGame() {
     pad.addEventListener('click', () => handlePadInput(index));
   });
 
+  function handleKeyInput(event) {
+    if (!running || !acceptingInput) return;
+    const mapped = keyMap[event.key.toLowerCase()];
+    if (mapped === undefined) return;
+    event.preventDefault();
+    handlePadInput(mapped);
+  }
+
+  window.addEventListener('keydown', handleKeyInput);
+
   startButton.addEventListener('click', () => {
     clearAllTimeouts();
     sequence = [];
@@ -462,7 +482,10 @@ function mountSequenceGame() {
     queueTimeout(nextRound, 400);
   });
 
-  return () => clearAllTimeouts();
+  return () => {
+    clearAllTimeouts();
+    window.removeEventListener('keydown', handleKeyInput);
+  };
 }
 
 function mountPatternGame() {
