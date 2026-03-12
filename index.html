@@ -23,6 +23,7 @@
         <button class="tab active" data-game="reaction">Reaction Timer</button>
         <button class="tab" data-game="memory">Memory Match</button>
         <button class="tab" data-game="sequence">Sequence Recall</button>
+        <button class="tab" data-game="pattern">Pattern Sprint</button>
       </div>
 
       <h2>Scoreboard</h2>
@@ -30,7 +31,12 @@
         <li>Best Reaction: <span id="best-reaction">-</span></li>
         <li>Memory Wins: <span id="memory-wins">0</span></li>
         <li>Best Sequence: <span id="best-sequence">0</span></li>
+        <li>Best Pattern Sprint: <span id="best-pattern">0</span></li>
       </ul>
+
+      <h2>Achievements</h2>
+      <ul id="achievement-list" class="achievement-list"></ul>
+      <button id="reset-scores" type="button">Reset Scores</button>
 
       <p class="small">Scores are saved in your browser storage.</p>
     </section>

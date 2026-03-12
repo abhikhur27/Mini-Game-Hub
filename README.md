@@ -1,6 +1,6 @@
 # Mini Game Hub
 
-Portfolio-grade browser arcade featuring three interactive games and persistent scores.
+Portfolio-grade browser arcade featuring four interactive games, persistent scores, and achievements.
 
 ## Included Games
 
@@ -16,6 +16,14 @@ Portfolio-grade browser arcade featuring three interactive games and persistent 
 3. **Sequence Recall**
    - Simon-style increasing pattern challenge.
    - Best completed round tracking.
+
+4. **Pattern Sprint**
+   - 25-second reflex challenge on a 3x3 live target grid.
+   - Dynamic scoring and personal best tracking.
+
+5. **Achievements Layer**
+   - Unlock milestones across all games.
+   - Arcade all-rounder badge for full completion.
 
 ## Technical Design
 

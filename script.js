@@ -1,4 +1,4 @@
-const stage = document.getElementById('stage');
+﻿const stage = document.getElementById('stage');
 const tabs = Array.from(document.querySelectorAll('.tab'));
 const gameTitle = document.getElementById('game-title');
 const gameNote = document.getElementById('game-note');
@@ -6,6 +6,9 @@ const gameNote = document.getElementById('game-note');
 const bestReactionEl = document.getElementById('best-reaction');
 const memoryWinsEl = document.getElementById('memory-wins');
 const bestSequenceEl = document.getElementById('best-sequence');
+const bestPatternEl = document.getElementById('best-pattern');
+const achievementList = document.getElementById('achievement-list');
+const resetScoresBtn = document.getElementById('reset-scores');
 
 const gameMeta = {
   reaction: {
@@ -20,18 +23,27 @@ const gameMeta = {
     title: 'Sequence Recall',
     note: 'Repeat an increasingly long sequence of colored pads.',
   },
+  pattern: {
+    title: 'Pattern Sprint',
+    note: 'Hit highlighted tiles as fast as possible before the timer ends.',
+  },
 };
 
-const scoreKey = 'mini_game_hub_scores_v2';
+const scoreKey = 'mini_game_hub_scores_v3';
 const scores = loadScores();
 let currentCleanup = () => {};
 
-function loadScores() {
-  const fallback = {
+function defaultScores() {
+  return {
     bestReaction: null,
     memoryWins: 0,
     bestSequence: 0,
+    bestPattern: 0,
   };
+}
+
+function loadScores() {
+  const fallback = defaultScores();
 
   try {
     const raw = JSON.parse(localStorage.getItem(scoreKey));
@@ -40,6 +52,7 @@ function loadScores() {
       bestReaction: Number.isFinite(raw.bestReaction) ? raw.bestReaction : null,
       memoryWins: Number.isFinite(raw.memoryWins) ? raw.memoryWins : 0,
       bestSequence: Number.isFinite(raw.bestSequence) ? raw.bestSequence : 0,
+      bestPattern: Number.isFinite(raw.bestPattern) ? raw.bestPattern : 0,
     };
   } catch (error) {
     return fallback;
@@ -50,10 +63,42 @@ function saveScores() {
   localStorage.setItem(scoreKey, JSON.stringify(scores));
 }
 
+function achievementState() {
+  const flags = {
+    lightning: scores.bestReaction !== null && scores.bestReaction <= 220,
+    memory: scores.memoryWins >= 5,
+    sequence: scores.bestSequence >= 8,
+    pattern: scores.bestPattern >= 20,
+  };
+
+  flags.arcade = flags.lightning && flags.memory && flags.sequence && flags.pattern;
+  return flags;
+}
+
+function renderAchievements() {
+  const unlocks = achievementState();
+  const rows = [
+    { id: 'lightning', label: 'Lightning Reflex', detail: 'Best reaction <= 220 ms' },
+    { id: 'memory', label: 'Memory Master', detail: 'Win Memory Match 5 times' },
+    { id: 'sequence', label: 'Sequence Savant', detail: 'Reach sequence round 8+' },
+    { id: 'pattern', label: 'Pattern Sprinter', detail: 'Score 20+ in Pattern Sprint' },
+    { id: 'arcade', label: 'Arcade All-Rounder', detail: 'Unlock all achievements' },
+  ];
+
+  achievementList.innerHTML = rows
+    .map((row) => {
+      const unlocked = Boolean(unlocks[row.id]);
+      return `<li class="${unlocked ? 'unlocked' : ''}">${unlocked ? 'Unlocked' : 'Locked'} | ${row.label} - ${row.detail}</li>`;
+    })
+    .join('');
+}
+
 function refreshScoreboard() {
   bestReactionEl.textContent = scores.bestReaction === null ? '-' : `${scores.bestReaction.toFixed(0)} ms`;
   memoryWinsEl.textContent = String(scores.memoryWins);
   bestSequenceEl.textContent = String(scores.bestSequence);
+  bestPatternEl.textContent = String(scores.bestPattern);
+  renderAchievements();
 }
 
 function activateTab(gameId) {
@@ -73,6 +118,7 @@ function setGame(gameId) {
   if (gameId === 'reaction') currentCleanup = mountReactionGame();
   if (gameId === 'memory') currentCleanup = mountMemoryGame();
   if (gameId === 'sequence') currentCleanup = mountSequenceGame();
+  if (gameId === 'pattern') currentCleanup = mountPatternGame();
 }
 
 function mountReactionGame() {
@@ -273,10 +319,10 @@ function mountSequenceGame() {
       <p id="sequence-round" class="mono">Round: 0</p>
     </div>
     <div id="sequence-grid" class="sequence-grid">
-      <button class="pad pad-0" data-pad="0" type="button" aria-label="Red pad"></button>
-      <button class="pad pad-1" data-pad="1" type="button" aria-label="Orange pad"></button>
-      <button class="pad pad-2" data-pad="2" type="button" aria-label="Green pad"></button>
-      <button class="pad pad-3" data-pad="3" type="button" aria-label="Blue pad"></button>
+      <button class="pad pad-0" data-pad="0" type="button" aria-label="Pad 1"></button>
+      <button class="pad pad-1" data-pad="1" type="button" aria-label="Pad 2"></button>
+      <button class="pad pad-2" data-pad="2" type="button" aria-label="Pad 3"></button>
+      <button class="pad pad-3" data-pad="3" type="button" aria-label="Pad 4"></button>
     </div>
     <p id="sequence-message" class="message">Press start to begin.</p>
   `;
@@ -388,8 +434,142 @@ function mountSequenceGame() {
   return () => clearAllTimeouts();
 }
 
+function mountPatternGame() {
+  stage.innerHTML = `
+    <div class="row">
+      <button id="pattern-start" class="primary" type="button">Start Sprint</button>
+      <p id="pattern-timer" class="mono">Time: 25.0s</p>
+      <p id="pattern-score" class="mono">Score: 0</p>
+    </div>
+    <div id="pattern-grid" class="pattern-grid"></div>
+    <p id="pattern-message" class="message">Hit glowing tiles fast. Misses cost points.</p>
+  `;
+
+  const startButton = document.getElementById('pattern-start');
+  const timerEl = document.getElementById('pattern-timer');
+  const scoreEl = document.getElementById('pattern-score');
+  const gridEl = document.getElementById('pattern-grid');
+  const messageEl = document.getElementById('pattern-message');
+
+  let tiles = [];
+  let running = false;
+  let score = 0;
+  let hotIndex = -1;
+  let gameStart = 0;
+  let hotSwitchId = null;
+  let frameId = null;
+
+  function buildGrid() {
+    gridEl.innerHTML = Array.from({ length: 9 }, (_, index) => `<button class="pattern-tile" data-index="${index}" type="button"></button>`).join('');
+    tiles = Array.from(gridEl.querySelectorAll('.pattern-tile'));
+
+    tiles.forEach((tile, index) => {
+      tile.addEventListener('click', () => {
+        if (!running) return;
+
+        if (index === hotIndex) {
+          score += 1;
+          scoreEl.textContent = `Score: ${score}`;
+          selectNextHot(index);
+        } else {
+          score = Math.max(0, score - 1);
+          scoreEl.textContent = `Score: ${score}`;
+        }
+      });
+    });
+  }
+
+  function selectNextHot(previous = -1) {
+    if (!tiles.length) return;
+
+    tiles.forEach((tile) => tile.classList.remove('hot'));
+
+    let next = Math.floor(Math.random() * tiles.length);
+    while (next === previous && tiles.length > 1) {
+      next = Math.floor(Math.random() * tiles.length);
+    }
+
+    hotIndex = next;
+    tiles[hotIndex].classList.add('hot');
+  }
+
+  function clearTimers() {
+    if (hotSwitchId) {
+      clearInterval(hotSwitchId);
+      hotSwitchId = null;
+    }
+    if (frameId) {
+      cancelAnimationFrame(frameId);
+      frameId = null;
+    }
+  }
+
+  function endGame() {
+    running = false;
+    clearTimers();
+    tiles.forEach((tile) => tile.classList.remove('hot'));
+
+    if (score > scores.bestPattern) {
+      scores.bestPattern = score;
+      saveScores();
+      refreshScoreboard();
+    }
+
+    startButton.disabled = false;
+    messageEl.textContent = `Sprint complete. Final score: ${score}.`;
+  }
+
+  function tick() {
+    if (!running) return;
+
+    const elapsed = (performance.now() - gameStart) / 1000;
+    const remaining = Math.max(0, 25 - elapsed);
+    timerEl.textContent = `Time: ${remaining.toFixed(1)}s`;
+
+    if (remaining <= 0) {
+      endGame();
+      return;
+    }
+
+    frameId = requestAnimationFrame(tick);
+  }
+
+  startButton.addEventListener('click', () => {
+    buildGrid();
+    score = 0;
+    scoreEl.textContent = 'Score: 0';
+    timerEl.textContent = 'Time: 25.0s';
+    messageEl.textContent = 'Go! Hit glowing tiles quickly.';
+    startButton.disabled = true;
+
+    running = true;
+    gameStart = performance.now();
+    selectNextHot();
+
+    hotSwitchId = setInterval(() => {
+      if (!running) return;
+      selectNextHot(hotIndex);
+    }, 620);
+
+    frameId = requestAnimationFrame(tick);
+  });
+
+  buildGrid();
+
+  return () => {
+    running = false;
+    clearTimers();
+  };
+}
+
 tabs.forEach((button) => {
   button.addEventListener('click', () => setGame(button.dataset.game));
+});
+
+resetScoresBtn.addEventListener('click', () => {
+  Object.assign(scores, defaultScores());
+  saveScores();
+  refreshScoreboard();
 });
 
 refreshScoreboard();
