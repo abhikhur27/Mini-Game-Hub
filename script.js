@@ -7,6 +7,7 @@ const bestReactionEl = document.getElementById('best-reaction');
 const memoryWinsEl = document.getElementById('memory-wins');
 const bestSequenceEl = document.getElementById('best-sequence');
 const bestPatternEl = document.getElementById('best-pattern');
+const totalRunsEl = document.getElementById('total-runs');
 const achievementList = document.getElementById('achievement-list');
 const runHistoryEl = document.getElementById('run-history');
 const resetScoresBtn = document.getElementById('reset-scores');
@@ -41,6 +42,7 @@ function defaultScores() {
     bestSequence: 0,
     bestPattern: 0,
     runHistory: [],
+    totalRuns: 0,
   };
 }
 
@@ -56,6 +58,7 @@ function loadScores() {
       bestSequence: Number.isFinite(raw.bestSequence) ? raw.bestSequence : 0,
       bestPattern: Number.isFinite(raw.bestPattern) ? raw.bestPattern : 0,
       runHistory: Array.isArray(raw.runHistory) ? raw.runHistory.slice(0, 10) : [],
+      totalRuns: Number.isFinite(raw.totalRuns) ? raw.totalRuns : 0,
     };
   } catch (error) {
     return fallback;
@@ -108,6 +111,7 @@ function renderRunHistory() {
 }
 
 function addRunEntry(game, detail) {
+  scores.totalRuns += 1;
   scores.runHistory.unshift({
     time: new Date().toLocaleTimeString(),
     game,
@@ -124,6 +128,7 @@ function refreshScoreboard() {
   memoryWinsEl.textContent = String(scores.memoryWins);
   bestSequenceEl.textContent = String(scores.bestSequence);
   bestPatternEl.textContent = String(scores.bestPattern);
+  totalRunsEl.textContent = String(scores.totalRuns);
   renderAchievements();
   renderRunHistory();
 }
