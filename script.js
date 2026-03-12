@@ -8,6 +8,7 @@ const memoryWinsEl = document.getElementById('memory-wins');
 const bestSequenceEl = document.getElementById('best-sequence');
 const bestPatternEl = document.getElementById('best-pattern');
 const achievementList = document.getElementById('achievement-list');
+const runHistoryEl = document.getElementById('run-history');
 const resetScoresBtn = document.getElementById('reset-scores');
 
 const gameMeta = {
@@ -39,6 +40,7 @@ function defaultScores() {
     memoryWins: 0,
     bestSequence: 0,
     bestPattern: 0,
+    runHistory: [],
   };
 }
 
@@ -53,6 +55,7 @@ function loadScores() {
       memoryWins: Number.isFinite(raw.memoryWins) ? raw.memoryWins : 0,
       bestSequence: Number.isFinite(raw.bestSequence) ? raw.bestSequence : 0,
       bestPattern: Number.isFinite(raw.bestPattern) ? raw.bestPattern : 0,
+      runHistory: Array.isArray(raw.runHistory) ? raw.runHistory.slice(0, 10) : [],
     };
   } catch (error) {
     return fallback;
@@ -93,12 +96,36 @@ function renderAchievements() {
     .join('');
 }
 
+function renderRunHistory() {
+  if (!scores.runHistory.length) {
+    runHistoryEl.innerHTML = '<li>No runs yet. Start a game.</li>';
+    return;
+  }
+
+  runHistoryEl.innerHTML = scores.runHistory
+    .map((entry) => `<li>${entry.time} | ${entry.game}: ${entry.detail}</li>`)
+    .join('');
+}
+
+function addRunEntry(game, detail) {
+  scores.runHistory.unshift({
+    time: new Date().toLocaleTimeString(),
+    game,
+    detail,
+  });
+
+  scores.runHistory = scores.runHistory.slice(0, 10);
+  saveScores();
+  renderRunHistory();
+}
+
 function refreshScoreboard() {
   bestReactionEl.textContent = scores.bestReaction === null ? '-' : `${scores.bestReaction.toFixed(0)} ms`;
   memoryWinsEl.textContent = String(scores.memoryWins);
   bestSequenceEl.textContent = String(scores.bestSequence);
   bestPatternEl.textContent = String(scores.bestPattern);
   renderAchievements();
+  renderRunHistory();
 }
 
 function activateTab(gameId) {
@@ -176,6 +203,7 @@ function mountReactionGame() {
       pad.classList.remove('waiting', 'ready');
       resetPadText('Too early. Start another trial.');
       result.textContent = 'Penalty: clicked before signal.';
+      addRunEntry('Reaction', 'Early click penalty');
       return;
     }
 
@@ -185,6 +213,7 @@ function mountReactionGame() {
       pad.classList.remove('ready');
       resetPadText('Nice. Start another trial.');
       result.textContent = `Reaction: ${reactionTime.toFixed(1)} ms`;
+      addRunEntry('Reaction', `${reactionTime.toFixed(1)} ms`);
 
       if (scores.bestReaction === null || reactionTime < scores.bestReaction) {
         scores.bestReaction = reactionTime;
@@ -290,6 +319,7 @@ function mountMemoryGame() {
         saveScores();
         refreshScoreboard();
         message.textContent = 'Board completed. Nice memory run.';
+        addRunEntry('Memory', 'Board completed');
       }
       return;
     }
@@ -404,6 +434,7 @@ function mountSequenceGame() {
       running = false;
       acceptingInput = false;
       startButton.disabled = false;
+      addRunEntry('Sequence', `Failed on round ${sequence.length}`);
       recordBest();
       return;
     }
@@ -508,6 +539,7 @@ function mountPatternGame() {
     running = false;
     clearTimers();
     tiles.forEach((tile) => tile.classList.remove('hot'));
+    addRunEntry('Pattern Sprint', `Score ${score}`);
 
     if (score > scores.bestPattern) {
       scores.bestPattern = score;
