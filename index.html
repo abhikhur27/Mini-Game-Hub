@@ -49,7 +49,12 @@
 
       <h2>Recent Runs</h2>
       <ul id="run-history" class="achievement-list"></ul>
-      <button id="reset-scores" type="button">Reset Scores</button>
+      <div class="sidebar-actions">
+        <button id="export-scores" type="button">Export Scores</button>
+        <button id="import-scores" type="button">Import Scores</button>
+        <button id="reset-scores" type="button">Reset Scores</button>
+      </div>
+      <input id="import-scores-file" type="file" accept="application/json" class="hidden">
 
       <p class="small">Scores are saved in your browser storage.</p>
     </section>

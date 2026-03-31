@@ -12,6 +12,9 @@ const achievementList = document.getElementById('achievement-list');
 const gameTipsEl = document.getElementById('game-tips');
 const runHistoryEl = document.getElementById('run-history');
 const resetScoresBtn = document.getElementById('reset-scores');
+const exportScoresBtn = document.getElementById('export-scores');
+const importScoresBtn = document.getElementById('import-scores');
+const importScoresFile = document.getElementById('import-scores-file');
 const difficultySelect = document.getElementById('difficulty-select');
 
 const gameMeta = {
@@ -80,6 +83,60 @@ function loadScores() {
 
 function saveScores() {
   localStorage.setItem(scoreKey, JSON.stringify(scores));
+}
+
+function exportScores() {
+  const payload = {
+    exportedAt: new Date().toISOString(),
+    difficulty: currentDifficulty,
+    scores,
+  };
+
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = 'mini-game-hub-scores.json';
+  anchor.click();
+  URL.revokeObjectURL(url);
+  gameNote.textContent = 'Exported scoreboard JSON.';
+}
+
+function importScores(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(String(reader.result || '{}'));
+      const imported = parsed.scores || parsed;
+      Object.assign(scores, defaultScores(), {
+        bestReaction: Number.isFinite(imported.bestReaction) ? imported.bestReaction : null,
+        memoryWins: Number.isFinite(imported.memoryWins) ? imported.memoryWins : 0,
+        bestSequence: Number.isFinite(imported.bestSequence) ? imported.bestSequence : 0,
+        bestPattern: Number.isFinite(imported.bestPattern) ? imported.bestPattern : 0,
+        runHistory: Array.isArray(imported.runHistory) ? imported.runHistory.slice(0, 10) : [],
+        totalRuns: Number.isFinite(imported.totalRuns) ? imported.totalRuns : 0,
+      });
+
+      if (typeof parsed.difficulty === 'string' && difficultyProfiles[parsed.difficulty]) {
+        currentDifficulty = parsed.difficulty;
+        difficultySelect.value = parsed.difficulty;
+      }
+
+      saveScores();
+      refreshScoreboard();
+      setGame(document.querySelector('.tab.active')?.dataset.game || 'reaction');
+      gameNote.textContent = 'Imported scoreboard JSON.';
+    } catch (error) {
+      gameNote.textContent = 'Could not import that score file.';
+    } finally {
+      event.target.value = '';
+    }
+  };
+
+  reader.readAsText(file);
 }
 
 function achievementState() {
@@ -667,7 +724,11 @@ resetScoresBtn.addEventListener('click', () => {
   Object.assign(scores, defaultScores());
   saveScores();
   refreshScoreboard();
+  gameNote.textContent = 'Scores reset. Start a new run.';
 });
+exportScoresBtn?.addEventListener('click', exportScores);
+importScoresBtn?.addEventListener('click', () => importScoresFile?.click());
+importScoresFile?.addEventListener('change', importScores);
 
 refreshScoreboard();
 setGame('reaction');

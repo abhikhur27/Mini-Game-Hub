@@ -25,6 +25,10 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
    - Unlock milestones across all games.
    - Arcade all-rounder badge for full completion.
 
+6. **Portable Scoreboards**
+   - Export browser progress as JSON.
+   - Re-import scores and run history on another machine.
+
 ## Technical Design
 
 - `index.html`: shell layout + game tabs + scoreboard.
