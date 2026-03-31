@@ -1,6 +1,6 @@
 # Mini Game Hub
 
-Portfolio-grade browser arcade featuring four interactive games, persistent scores, and achievements.
+Portfolio-grade browser arcade featuring four interactive games, difficulty presets, persistent scores, and achievements.
 
 ## Included Games
 

@@ -12,6 +12,7 @@ const achievementList = document.getElementById('achievement-list');
 const gameTipsEl = document.getElementById('game-tips');
 const runHistoryEl = document.getElementById('run-history');
 const resetScoresBtn = document.getElementById('reset-scores');
+const difficultySelect = document.getElementById('difficulty-select');
 
 const gameMeta = {
   reaction: {
@@ -39,6 +40,13 @@ const gameMeta = {
 const scoreKey = 'mini_game_hub_scores_v3';
 const scores = loadScores();
 let currentCleanup = () => {};
+let currentDifficulty = 'standard';
+
+const difficultyProfiles = {
+  casual: { reactionMin: 1200, reactionRange: 2400, memoryPairs: 5, sequenceDelay: 720, patternDuration: 28, patternSwitch: 720 },
+  standard: { reactionMin: 900, reactionRange: 2200, memoryPairs: 6, sequenceDelay: 600, patternDuration: 25, patternSwitch: 620 },
+  expert: { reactionMin: 650, reactionRange: 1700, memoryPairs: 8, sequenceDelay: 470, patternDuration: 22, patternSwitch: 480 },
+};
 
 function defaultScores() {
   return {
@@ -165,6 +173,7 @@ function setGame(gameId) {
 }
 
 function mountReactionGame() {
+  const profile = difficultyProfiles[currentDifficulty];
   stage.innerHTML = `
     <div class="row">
       <button id="reaction-start" class="primary" type="button">Start Trial</button>
@@ -202,7 +211,7 @@ function mountReactionGame() {
     resetPadText('Wait for green...');
     result.textContent = 'Trial running...';
 
-    const delay = 900 + Math.random() * 2200;
+    const delay = profile.reactionMin + Math.random() * profile.reactionRange;
     timerId = window.setTimeout(() => {
       phase = 'ready';
       startTime = performance.now();
@@ -243,6 +252,7 @@ function mountReactionGame() {
 }
 
 function mountMemoryGame() {
+  const profile = difficultyProfiles[currentDifficulty];
   stage.innerHTML = `
     <div class="row">
       <button id="memory-reset" type="button">Restart Board</button>
@@ -251,7 +261,7 @@ function mountMemoryGame() {
     <div id="memory-grid" class="memory-grid"></div>
   `;
 
-  const symbols = ['A', 'B', 'C', 'D', 'E', 'F'];
+  const symbols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'].slice(0, profile.memoryPairs);
   const resetButton = document.getElementById('memory-reset');
   const message = document.getElementById('memory-message');
   const grid = document.getElementById('memory-grid');
@@ -359,6 +369,7 @@ function mountMemoryGame() {
 }
 
 function mountSequenceGame() {
+  const profile = difficultyProfiles[currentDifficulty];
   stage.innerHTML = `
     <div class="row">
       <button id="sequence-start" class="primary" type="button">Start Game</button>
@@ -432,13 +443,13 @@ function mountSequenceGame() {
     messageEl.textContent = 'Watch the pattern...';
 
     sequence.forEach((value, index) => {
-      queueTimeout(() => flashPad(value), 600 * (index + 1));
+      queueTimeout(() => flashPad(value), profile.sequenceDelay * (index + 1));
     });
 
     queueTimeout(() => {
       acceptingInput = true;
       messageEl.textContent = 'Your turn.';
-    }, 600 * (sequence.length + 1));
+    }, profile.sequenceDelay * (sequence.length + 1));
   }
 
   function nextRound() {
@@ -505,10 +516,11 @@ function mountSequenceGame() {
 }
 
 function mountPatternGame() {
+  const profile = difficultyProfiles[currentDifficulty];
   stage.innerHTML = `
     <div class="row">
       <button id="pattern-start" class="primary" type="button">Start Sprint</button>
-      <p id="pattern-timer" class="mono">Time: 25.0s</p>
+      <p id="pattern-timer" class="mono">Time: ${profile.patternDuration.toFixed(1)}s</p>
       <p id="pattern-score" class="mono">Score: 0</p>
     </div>
     <div id="pattern-grid" class="pattern-grid"></div>
@@ -594,7 +606,7 @@ function mountPatternGame() {
     if (!running) return;
 
     const elapsed = (performance.now() - gameStart) / 1000;
-    const remaining = Math.max(0, 25 - elapsed);
+    const remaining = Math.max(0, profile.patternDuration - elapsed);
     timerEl.textContent = `Time: ${remaining.toFixed(1)}s`;
 
     if (remaining <= 0) {
@@ -609,7 +621,7 @@ function mountPatternGame() {
     buildGrid();
     score = 0;
     scoreEl.textContent = 'Score: 0';
-    timerEl.textContent = 'Time: 25.0s';
+    timerEl.textContent = `Time: ${profile.patternDuration.toFixed(1)}s`;
     messageEl.textContent = 'Go! Hit glowing tiles quickly.';
     startButton.disabled = true;
 
@@ -620,7 +632,7 @@ function mountPatternGame() {
     hotSwitchId = setInterval(() => {
       if (!running) return;
       selectNextHot(hotIndex);
-    }, 620);
+    }, profile.patternSwitch);
 
     frameId = requestAnimationFrame(tick);
   });
@@ -635,6 +647,11 @@ function mountPatternGame() {
 
 tabs.forEach((button) => {
   button.addEventListener('click', () => setGame(button.dataset.game));
+});
+
+difficultySelect.addEventListener('change', () => {
+  currentDifficulty = difficultySelect.value;
+  setGame(document.querySelector('.tab.active')?.dataset.game || 'reaction');
 });
 
 window.addEventListener('keydown', (event) => {
