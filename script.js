@@ -9,6 +9,7 @@ const bestSequenceEl = document.getElementById('best-sequence');
 const bestPatternEl = document.getElementById('best-pattern');
 const totalRunsEl = document.getElementById('total-runs');
 const achievementList = document.getElementById('achievement-list');
+const gameTipsEl = document.getElementById('game-tips');
 const runHistoryEl = document.getElementById('run-history');
 const resetScoresBtn = document.getElementById('reset-scores');
 
@@ -16,18 +17,22 @@ const gameMeta = {
   reaction: {
     title: 'Reaction Timer',
     note: 'Click as soon as the panel turns green. Early clicks are penalties.',
+    tips: ['Wait for green before clicking.', 'Chain repeat trials to compare your floor.', 'Mouse or touch works best here.'],
   },
   memory: {
     title: 'Memory Match',
     note: 'Match all symbol pairs in as few errors as possible.',
+    tips: ['Use early mismatches as free information.', 'Clear edges first to reduce uncertainty.', 'Clean wins build the Memory Master count.'],
   },
   sequence: {
     title: 'Sequence Recall',
     note: 'Repeat an increasingly long sequence of colored pads (use 1-4 or Q/W/A/S keys).',
+    tips: ['Number keys 1-4 and Q/W/A/S both work.', 'Chunk the pattern into smaller beats.', 'Best score tracks your deepest round.'],
   },
   pattern: {
     title: 'Pattern Sprint',
     note: 'Hit highlighted tiles as fast as possible before the timer ends.',
+    tips: ['Misses cost points.', 'Keep your cursor near center between targets.', 'Treat it like aim training, not random clicks.'],
   },
 };
 
@@ -139,6 +144,11 @@ function activateTab(gameId) {
   });
 }
 
+function renderTips(gameId) {
+  const tips = gameMeta[gameId].tips || [];
+  gameTipsEl.innerHTML = tips.map((tip) => `<li>${tip}</li>`).join('');
+}
+
 function setGame(gameId) {
   currentCleanup();
   currentCleanup = () => {};
@@ -146,6 +156,7 @@ function setGame(gameId) {
   activateTab(gameId);
   gameTitle.textContent = gameMeta[gameId].title;
   gameNote.textContent = gameMeta[gameId].note;
+  renderTips(gameId);
 
   if (gameId === 'reaction') currentCleanup = mountReactionGame();
   if (gameId === 'memory') currentCleanup = mountMemoryGame();
@@ -624,6 +635,15 @@ function mountPatternGame() {
 
 tabs.forEach((button) => {
   button.addEventListener('click', () => setGame(button.dataset.game));
+});
+
+window.addEventListener('keydown', (event) => {
+  if (event.target.matches('input, textarea, button')) return;
+  const shortcutMap = { '1': 'reaction', '2': 'memory', '3': 'sequence', '4': 'pattern' };
+  const gameId = shortcutMap[event.key];
+  if (gameId) {
+    setGame(gameId);
+  }
 });
 
 resetScoresBtn.addEventListener('click', () => {
