@@ -305,7 +305,25 @@ function mountReactionGame() {
     }
   });
 
-  return () => clearTimer();
+  function handleReactionKey(event) {
+    if (event.target.matches('input, textarea, select')) return;
+    if (event.key !== ' ' && event.key !== 'Enter') return;
+    event.preventDefault();
+
+    if (phase === 'idle') {
+      startButton.click();
+      return;
+    }
+
+    pad.click();
+  }
+
+  window.addEventListener('keydown', handleReactionKey);
+
+  return () => {
+    clearTimer();
+    window.removeEventListener('keydown', handleReactionKey);
+  };
 }
 
 function mountMemoryGame() {
@@ -581,7 +599,7 @@ function mountPatternGame() {
       <p id="pattern-score" class="mono">Score: 0</p>
     </div>
     <div id="pattern-grid" class="pattern-grid"></div>
-    <p id="pattern-message" class="message">Hit glowing tiles fast. Misses cost points.</p>
+    <p id="pattern-message" class="message">Hit glowing tiles fast. Misses cost points. Keyboard grid: 7 8 9 / 4 5 6 / 1 2 3.</p>
   `;
 
   const startButton = document.getElementById('pattern-start');
@@ -597,24 +615,37 @@ function mountPatternGame() {
   let gameStart = 0;
   let hotSwitchId = null;
   let frameId = null;
+  const keyToIndex = {
+    '7': 0,
+    '8': 1,
+    '9': 2,
+    '4': 3,
+    '5': 4,
+    '6': 5,
+    '1': 6,
+    '2': 7,
+    '3': 8,
+  };
+
+  function handleTileHit(index) {
+    if (!running) return;
+
+    if (index === hotIndex) {
+      score += 1;
+      scoreEl.textContent = `Score: ${score}`;
+      selectNextHot(index);
+    } else {
+      score = Math.max(0, score - 1);
+      scoreEl.textContent = `Score: ${score}`;
+    }
+  }
 
   function buildGrid() {
     gridEl.innerHTML = Array.from({ length: 9 }, (_, index) => `<button class="pattern-tile" data-index="${index}" type="button"></button>`).join('');
     tiles = Array.from(gridEl.querySelectorAll('.pattern-tile'));
 
     tiles.forEach((tile, index) => {
-      tile.addEventListener('click', () => {
-        if (!running) return;
-
-        if (index === hotIndex) {
-          score += 1;
-          scoreEl.textContent = `Score: ${score}`;
-          selectNextHot(index);
-        } else {
-          score = Math.max(0, score - 1);
-          scoreEl.textContent = `Score: ${score}`;
-        }
-      });
+      tile.addEventListener('click', () => handleTileHit(index));
     });
   }
 
@@ -694,11 +725,31 @@ function mountPatternGame() {
     frameId = requestAnimationFrame(tick);
   });
 
+  function handlePatternKey(event) {
+    if (event.target.matches('input, textarea, select')) return;
+
+    if (!running) {
+      if ((event.key === ' ' || event.key === 'Enter') && !startButton.disabled) {
+        event.preventDefault();
+        startButton.click();
+      }
+      return;
+    }
+
+    const mappedIndex = keyToIndex[event.key];
+    if (mappedIndex === undefined) return;
+    event.preventDefault();
+    handleTileHit(mappedIndex);
+  }
+
+  window.addEventListener('keydown', handlePatternKey);
+
   buildGrid();
 
   return () => {
     running = false;
     clearTimers();
+    window.removeEventListener('keydown', handlePatternKey);
   };
 }
 

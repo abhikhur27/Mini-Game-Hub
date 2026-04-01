@@ -20,6 +20,7 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
 4. **Pattern Sprint**
    - 25-second reflex challenge on a 3x3 live target grid.
    - Dynamic scoring and personal best tracking.
+   - Keyboard grid support on `1-9` in addition to mouse clicks.
 
 5. **Achievements Layer**
    - Unlock milestones across all games.
@@ -28,6 +29,10 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
 6. **Portable Scoreboards**
    - Export browser progress as JSON.
    - Re-import scores and run history on another machine.
+
+7. **Keyboard Play**
+   - `Space` / `Enter` can start and resolve reaction trials.
+   - Pattern Sprint supports a keyboard tile layout for faster replay.
 
 ## Technical Design
 
@@ -61,4 +66,4 @@ Open `http://localhost:8000`.
 
 - Add difficulty presets per game.
 - Add shared achievements system.
-- Add keyboard controls and high-score leaderboard export.
+- Add high-score leaderboard export.
