@@ -9,6 +9,7 @@ const bestSequenceEl = document.getElementById('best-sequence');
 const bestPatternEl = document.getElementById('best-pattern');
 const totalRunsEl = document.getElementById('total-runs');
 const achievementList = document.getElementById('achievement-list');
+const trainingCoachEl = document.getElementById('training-coach');
 const gameTipsEl = document.getElementById('game-tips');
 const runHistoryEl = document.getElementById('run-history');
 const resetScoresBtn = document.getElementById('reset-scores');
@@ -180,6 +181,33 @@ function renderRunHistory() {
     .join('');
 }
 
+function renderTrainingCoach() {
+  if (!trainingCoachEl) return;
+
+  const recentRuns = scores.runHistory.slice(0, 3).map((entry) => entry.game);
+  let focus = 'Reaction Timer';
+  let reason = 'You do not have a reaction benchmark yet. Establish a floor before optimizing harder games.';
+
+  if (scores.bestReaction !== null && scores.bestReaction <= 220 && scores.memoryWins < 5) {
+    focus = 'Memory Match';
+    reason = 'Your reflex baseline is already strong. The cleanest unlock path now is building repeatable board clears.';
+  } else if (scores.memoryWins >= 5 && scores.bestSequence < 8) {
+    focus = 'Sequence Recall';
+    reason = 'Memory fundamentals are in place. The next gap is sustaining a longer working-memory chain.';
+  } else if (scores.bestSequence >= 8 && scores.bestPattern < 20) {
+    focus = 'Pattern Sprint';
+    reason = 'Your recall is solid. Shift into speed and cursor discipline to round out the arcade profile.';
+  } else if (scores.totalRuns >= 8) {
+    focus = 'Rotation Drill';
+    reason = 'You have enough baseline data. Rotate games by weakness so you do not overtrain one mechanic.';
+  }
+
+  const trend = recentRuns.length
+    ? `Recent focus: ${recentRuns.join(' -> ')}.`
+    : 'No recent runs logged yet.';
+  trainingCoachEl.innerHTML = `<strong>${focus}</strong><br>${reason}<br>${trend}<br>Difficulty profile: ${currentDifficulty}.`;
+}
+
 function addRunEntry(game, detail) {
   scores.totalRuns += 1;
   scores.runHistory.unshift({
@@ -201,6 +229,7 @@ function refreshScoreboard() {
   totalRunsEl.textContent = String(scores.totalRuns);
   renderAchievements();
   renderRunHistory();
+  renderTrainingCoach();
 }
 
 function activateTab(gameId) {

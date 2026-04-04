@@ -26,11 +26,15 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
    - Unlock milestones across all games.
    - Arcade all-rounder badge for full completion.
 
-6. **Portable Scoreboards**
+6. **Training Coach**
+   - Reads recent runs and milestone gaps.
+   - Suggests the next game to practice for balanced improvement.
+
+7. **Portable Scoreboards**
    - Export browser progress as JSON.
    - Re-import scores and run history on another machine.
 
-7. **Keyboard Play**
+8. **Keyboard Play**
    - `Space` / `Enter` can start and resolve reaction trials.
    - Pattern Sprint supports a keyboard tile layout for faster replay.
 

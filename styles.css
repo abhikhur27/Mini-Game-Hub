@@ -127,6 +127,19 @@ button {
   color: #dbe4ff;
 }
 
+.coach-card {
+  margin-top: 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #171e2d;
+  padding: 0.6rem 0.7rem;
+  line-height: 1.6;
+}
+
+.coach-card strong {
+  color: var(--accent);
+}
+
 .small {
   color: var(--muted);
   font-size: 0.84rem;
