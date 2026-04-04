@@ -30,6 +30,10 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
    - Reads recent runs and milestone gaps.
    - Suggests the next game to practice for balanced improvement.
 
+9. **Milestone Board**
+   - Shows the exact gap to each remaining achievement threshold.
+   - Keeps the next target visible without reading the whole achievement list.
+
 7. **Portable Scoreboards**
    - Export browser progress as JSON.
    - Re-import scores and run history on another machine.

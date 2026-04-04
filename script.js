@@ -10,6 +10,7 @@ const bestPatternEl = document.getElementById('best-pattern');
 const totalRunsEl = document.getElementById('total-runs');
 const achievementList = document.getElementById('achievement-list');
 const trainingCoachEl = document.getElementById('training-coach');
+const milestoneBoardEl = document.getElementById('milestone-board');
 const gameTipsEl = document.getElementById('game-tips');
 const runHistoryEl = document.getElementById('run-history');
 const resetScoresBtn = document.getElementById('reset-scores');
@@ -208,6 +209,32 @@ function renderTrainingCoach() {
   trainingCoachEl.innerHTML = `<strong>${focus}</strong><br>${reason}<br>${trend}<br>Difficulty profile: ${currentDifficulty}.`;
 }
 
+function renderMilestoneBoard() {
+  if (!milestoneBoardEl) return;
+
+  const targets = [];
+  if (scores.bestReaction === null || scores.bestReaction > 220) {
+    const gap = scores.bestReaction === null ? 'set your first benchmark' : `cut ${(scores.bestReaction - 220).toFixed(0)} ms`;
+    targets.push(`Reaction Timer: ${gap} to unlock Lightning Reflex.`);
+  }
+
+  if (scores.memoryWins < 5) {
+    targets.push(`Memory Match: ${5 - scores.memoryWins} more clean board${5 - scores.memoryWins === 1 ? '' : 's'} for Memory Master.`);
+  }
+
+  if (scores.bestSequence < 8) {
+    targets.push(`Sequence Recall: push ${8 - scores.bestSequence} more round${8 - scores.bestSequence === 1 ? '' : 's'} for Sequence Savant.`);
+  }
+
+  if (scores.bestPattern < 20) {
+    targets.push(`Pattern Sprint: add ${20 - scores.bestPattern} more point${20 - scores.bestPattern === 1 ? '' : 's'} for Pattern Sprinter.`);
+  }
+
+  milestoneBoardEl.innerHTML = targets.length
+    ? targets.map((target) => `<p>${target}</p>`).join('')
+    : '<strong>All milestone targets cleared.</strong><br>Rotate games at higher difficulty to keep the profile balanced.';
+}
+
 function addRunEntry(game, detail) {
   scores.totalRuns += 1;
   scores.runHistory.unshift({
@@ -230,6 +257,7 @@ function refreshScoreboard() {
   renderAchievements();
   renderRunHistory();
   renderTrainingCoach();
+  renderMilestoneBoard();
 }
 
 function activateTab(gameId) {
