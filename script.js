@@ -11,6 +11,7 @@ const totalRunsEl = document.getElementById('total-runs');
 const achievementList = document.getElementById('achievement-list');
 const trainingCoachEl = document.getElementById('training-coach');
 const milestoneBoardEl = document.getElementById('milestone-board');
+const dailyDrillEl = document.getElementById('daily-drill');
 const gameTipsEl = document.getElementById('game-tips');
 const runHistoryEl = document.getElementById('run-history');
 const resetScoresBtn = document.getElementById('reset-scores');
@@ -235,6 +236,50 @@ function renderMilestoneBoard() {
     : '<strong>All milestone targets cleared.</strong><br>Rotate games at higher difficulty to keep the profile balanced.';
 }
 
+function getDailyDrill() {
+  const day = new Date().getDay();
+  const drills = [
+    {
+      game: 'Reaction Timer',
+      goal: 'Beat 260 ms once.',
+      completed: scores.bestReaction !== null && scores.bestReaction <= 260,
+      note: 'Use short resets between attempts so you do not game one hot reaction.',
+    },
+    {
+      game: 'Memory Match',
+      goal: 'Clear one board cleanly.',
+      completed: scores.memoryWins >= 1,
+      note: 'Scan corners first, then collapse uncertainty inward instead of chasing random flips.',
+    },
+    {
+      game: 'Sequence Recall',
+      goal: 'Reach round 6.',
+      completed: scores.bestSequence >= 6,
+      note: 'Speak the pattern rhythm in your head instead of memorizing single colors.',
+    },
+    {
+      game: 'Pattern Sprint',
+      goal: 'Score 14 or higher.',
+      completed: scores.bestPattern >= 14,
+      note: 'Keep your cursor centered and let the next target come to you.',
+    },
+  ];
+
+  return drills[day % drills.length];
+}
+
+function renderDailyDrill() {
+  if (!dailyDrillEl) return;
+
+  const drill = getDailyDrill();
+  dailyDrillEl.innerHTML = `
+    <strong>${drill.game}</strong><br>
+    Goal: ${drill.goal}<br>
+    Status: ${drill.completed ? 'Already cleared on this profile.' : 'Still open.'}<br>
+    ${drill.note}
+  `;
+}
+
 function addRunEntry(game, detail) {
   scores.totalRuns += 1;
   scores.runHistory.unshift({
@@ -258,6 +303,7 @@ function refreshScoreboard() {
   renderRunHistory();
   renderTrainingCoach();
   renderMilestoneBoard();
+  renderDailyDrill();
 }
 
 function activateTab(gameId) {
