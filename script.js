@@ -8,6 +8,8 @@ const memoryWinsEl = document.getElementById('memory-wins');
 const bestSequenceEl = document.getElementById('best-sequence');
 const bestPatternEl = document.getElementById('best-pattern');
 const totalRunsEl = document.getElementById('total-runs');
+const currentStreakEl = document.getElementById('current-streak');
+const bestStreakEl = document.getElementById('best-streak');
 const achievementList = document.getElementById('achievement-list');
 const trainingCoachEl = document.getElementById('training-coach');
 const milestoneBoardEl = document.getElementById('milestone-board');
@@ -62,6 +64,7 @@ function defaultScores() {
     bestPattern: 0,
     runHistory: [],
     totalRuns: 0,
+    runCalendar: [],
   };
 }
 
@@ -78,6 +81,7 @@ function loadScores() {
       bestPattern: Number.isFinite(raw.bestPattern) ? raw.bestPattern : 0,
       runHistory: Array.isArray(raw.runHistory) ? raw.runHistory.slice(0, 10) : [],
       totalRuns: Number.isFinite(raw.totalRuns) ? raw.totalRuns : 0,
+      runCalendar: Array.isArray(raw.runCalendar) ? raw.runCalendar.slice(0, 90) : [],
     };
   } catch (error) {
     return fallback;
@@ -280,10 +284,62 @@ function renderDailyDrill() {
   `;
 }
 
+function formatRunDate(date = new Date()) {
+  return date.toISOString().slice(0, 10);
+}
+
+function computeStreaks() {
+  const days = [...new Set(scores.runCalendar)].sort();
+  if (!days.length) {
+    return { current: 0, best: 0 };
+  }
+
+  let best = 1;
+  let currentRun = 1;
+  for (let index = 1; index < days.length; index += 1) {
+    const prev = new Date(`${days[index - 1]}T00:00:00`);
+    const current = new Date(`${days[index]}T00:00:00`);
+    const deltaDays = Math.round((current - prev) / (1000 * 60 * 60 * 24));
+    if (deltaDays === 1) {
+      currentRun += 1;
+      best = Math.max(best, currentRun);
+    } else if (deltaDays > 1) {
+      currentRun = 1;
+    }
+  }
+
+  let current = 1;
+  const today = formatRunDate();
+  const yesterday = formatRunDate(new Date(Date.now() - 1000 * 60 * 60 * 24));
+  const mostRecent = days[days.length - 1];
+  if (mostRecent !== today && mostRecent !== yesterday) {
+    current = 0;
+  } else {
+    for (let index = days.length - 1; index > 0; index -= 1) {
+      const prev = new Date(`${days[index - 1]}T00:00:00`);
+      const next = new Date(`${days[index]}T00:00:00`);
+      const deltaDays = Math.round((next - prev) / (1000 * 60 * 60 * 24));
+      if (deltaDays === 1) {
+        current += 1;
+      } else {
+        break;
+      }
+    }
+  }
+
+  return { current, best };
+}
+
 function addRunEntry(game, detail) {
   scores.totalRuns += 1;
+  const today = formatRunDate();
+  if (!scores.runCalendar.includes(today)) {
+    scores.runCalendar.push(today);
+    scores.runCalendar = scores.runCalendar.slice(-90);
+  }
   scores.runHistory.unshift({
     time: new Date().toLocaleTimeString(),
+    date: today,
     game,
     detail,
   });
@@ -294,11 +350,14 @@ function addRunEntry(game, detail) {
 }
 
 function refreshScoreboard() {
+  const streaks = computeStreaks();
   bestReactionEl.textContent = scores.bestReaction === null ? '-' : `${scores.bestReaction.toFixed(0)} ms`;
   memoryWinsEl.textContent = String(scores.memoryWins);
   bestSequenceEl.textContent = String(scores.bestSequence);
   bestPatternEl.textContent = String(scores.bestPattern);
   totalRunsEl.textContent = String(scores.totalRuns);
+  currentStreakEl.textContent = `${streaks.current} day${streaks.current === 1 ? '' : 's'}`;
+  bestStreakEl.textContent = `${streaks.best} day${streaks.best === 1 ? '' : 's'}`;
   renderAchievements();
   renderRunHistory();
   renderTrainingCoach();
