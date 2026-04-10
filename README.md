@@ -38,6 +38,10 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
    - Rotates a focused practice target by day.
    - Shows whether the current profile has already cleared the drill goal.
 
+11. **Coverage Board**
+   - Shows which games have recent reps vs neglected practice.
+   - Keeps the weakest lane visible without reading the full run log.
+
 7. **Portable Scoreboards**
    - Export browser progress as JSON.
    - Re-import scores and run history on another machine.

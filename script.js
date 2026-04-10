@@ -14,6 +14,7 @@ const achievementList = document.getElementById('achievement-list');
 const trainingCoachEl = document.getElementById('training-coach');
 const milestoneBoardEl = document.getElementById('milestone-board');
 const dailyDrillEl = document.getElementById('daily-drill');
+const coverageBoardEl = document.getElementById('coverage-board');
 const gameTipsEl = document.getElementById('game-tips');
 const runHistoryEl = document.getElementById('run-history');
 const resetScoresBtn = document.getElementById('reset-scores');
@@ -125,6 +126,7 @@ function importScores(event) {
         bestPattern: Number.isFinite(imported.bestPattern) ? imported.bestPattern : 0,
         runHistory: Array.isArray(imported.runHistory) ? imported.runHistory.slice(0, 10) : [],
         totalRuns: Number.isFinite(imported.totalRuns) ? imported.totalRuns : 0,
+        runCalendar: Array.isArray(imported.runCalendar) ? imported.runCalendar.slice(-90) : [],
       });
 
       if (typeof parsed.difficulty === 'string' && difficultyProfiles[parsed.difficulty]) {
@@ -284,6 +286,32 @@ function renderDailyDrill() {
   `;
 }
 
+function renderCoverageBoard() {
+  if (!coverageBoardEl) return;
+
+  const recentCounts = scores.runHistory.reduce((acc, entry) => {
+    const normalized = String(entry.game || '').toLowerCase();
+    if (normalized.includes('reaction')) acc.reaction += 1;
+    if (normalized.includes('memory')) acc.memory += 1;
+    if (normalized.includes('sequence')) acc.sequence += 1;
+    if (normalized.includes('pattern')) acc.pattern += 1;
+    return acc;
+  }, { reaction: 0, memory: 0, sequence: 0, pattern: 0 });
+
+  const rows = [
+    { label: 'Reaction Timer', runs: recentCounts.reaction, status: scores.bestReaction !== null ? `${scores.bestReaction.toFixed(0)} ms best` : 'No benchmark yet' },
+    { label: 'Memory Match', runs: recentCounts.memory, status: scores.memoryWins > 0 ? `${scores.memoryWins} win${scores.memoryWins === 1 ? '' : 's'}` : 'No clears yet' },
+    { label: 'Sequence Recall', runs: recentCounts.sequence, status: scores.bestSequence > 0 ? `Round ${scores.bestSequence} best` : 'No sequence run yet' },
+    { label: 'Pattern Sprint', runs: recentCounts.pattern, status: scores.bestPattern > 0 ? `${scores.bestPattern} point best` : 'No sprint run yet' },
+  ];
+
+  const coldest = [...rows].sort((a, b) => a.runs - b.runs)[0];
+  coverageBoardEl.innerHTML = `
+    ${rows.map((row) => `<p><strong>${row.label}:</strong> ${row.runs} recent run${row.runs === 1 ? '' : 's'} | ${row.status}</p>`).join('')}
+    <p><strong>Coverage cue:</strong> ${coldest.runs === 0 ? `You have not touched ${coldest.label} recently.` : `${coldest.label} is your least-played recent lane.`}</p>
+  `;
+}
+
 function formatRunDate(date = new Date()) {
   return date.toISOString().slice(0, 10);
 }
@@ -363,6 +391,7 @@ function refreshScoreboard() {
   renderTrainingCoach();
   renderMilestoneBoard();
   renderDailyDrill();
+  renderCoverageBoard();
 }
 
 function activateTab(gameId) {
