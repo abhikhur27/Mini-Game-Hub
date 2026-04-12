@@ -15,6 +15,7 @@ const trainingCoachEl = document.getElementById('training-coach');
 const milestoneBoardEl = document.getElementById('milestone-board');
 const dailyDrillEl = document.getElementById('daily-drill');
 const coverageBoardEl = document.getElementById('coverage-board');
+const progressRadarEl = document.getElementById('progress-radar');
 const gameTipsEl = document.getElementById('game-tips');
 const runHistoryEl = document.getElementById('run-history');
 const resetScoresBtn = document.getElementById('reset-scores');
@@ -312,6 +313,55 @@ function renderCoverageBoard() {
   `;
 }
 
+function renderProgressRadar() {
+  if (!progressRadarEl) return;
+
+  const rows = [
+    {
+      label: 'Reaction Timer',
+      value: scores.bestReaction === null ? 0 : Math.max(0, Math.min(100, ((320 - scores.bestReaction) / 100) * 100)),
+      detail: scores.bestReaction === null ? 'No benchmark yet' : `${scores.bestReaction.toFixed(0)} ms best`,
+    },
+    {
+      label: 'Memory Match',
+      value: Math.min(100, (scores.memoryWins / 5) * 100),
+      detail: `${scores.memoryWins}/5 clean clears`,
+    },
+    {
+      label: 'Sequence Recall',
+      value: Math.min(100, (scores.bestSequence / 8) * 100),
+      detail: `Round ${scores.bestSequence}/8 target`,
+    },
+    {
+      label: 'Pattern Sprint',
+      value: Math.min(100, (scores.bestPattern / 20) * 100),
+      detail: `${scores.bestPattern}/20 target`,
+    },
+  ];
+
+  const averageReadiness = rows.reduce((sum, row) => sum + row.value, 0) / rows.length;
+  const coldest = [...rows].sort((a, b) => a.value - b.value)[0];
+
+  progressRadarEl.innerHTML = `
+    ${rows
+      .map(
+        (row) => `
+          <div class="progress-row">
+            <div class="progress-meta">
+              <strong>${row.label}</strong>
+              <span>${Math.round(row.value)}%</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill" style="width: ${row.value}%;"></div></div>
+            <div>${row.detail}</div>
+          </div>
+        `
+      )
+      .join('')}
+    <p><strong>Profile balance:</strong> ${averageReadiness >= 85 ? 'Well-rounded arcade profile.' : averageReadiness >= 55 ? 'Solid base with one clear weakness.' : 'Still building baseline coverage.'}</p>
+    <p><strong>Weakest lane:</strong> ${coldest.label} is furthest from its milestone target.</p>
+  `;
+}
+
 function formatRunDate(date = new Date()) {
   return date.toISOString().slice(0, 10);
 }
@@ -392,6 +442,7 @@ function refreshScoreboard() {
   renderMilestoneBoard();
   renderDailyDrill();
   renderCoverageBoard();
+  renderProgressRadar();
 }
 
 function activateTab(gameId) {
