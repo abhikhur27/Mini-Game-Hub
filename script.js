@@ -16,6 +16,7 @@ const milestoneBoardEl = document.getElementById('milestone-board');
 const dailyDrillEl = document.getElementById('daily-drill');
 const coverageBoardEl = document.getElementById('coverage-board');
 const progressRadarEl = document.getElementById('progress-radar');
+const practiceMatrixEl = document.getElementById('practice-matrix');
 const gameTipsEl = document.getElementById('game-tips');
 const runHistoryEl = document.getElementById('run-history');
 const resetScoresBtn = document.getElementById('reset-scores');
@@ -362,6 +363,54 @@ function renderProgressRadar() {
   `;
 }
 
+function renderPracticeMatrix() {
+  if (!practiceMatrixEl) return;
+
+  const today = new Date();
+  const days = [];
+  for (let offset = 13; offset >= 0; offset -= 1) {
+    const day = new Date(today);
+    day.setHours(0, 0, 0, 0);
+    day.setDate(day.getDate() - offset);
+    days.push(day.toISOString().slice(0, 10));
+  }
+
+  const counts = days.map((day) => scores.runCalendar.filter((entry) => entry === day).length);
+  const hottest = Math.max(0, ...counts);
+  const activeDays = counts.filter((count) => count > 0).length;
+  const longestGap = counts.reduce(
+    (state, count) => {
+      if (count === 0) {
+        return {
+          current: state.current + 1,
+          longest: Math.max(state.longest, state.current + 1),
+        };
+      }
+      return { current: 0, longest: state.longest };
+    },
+    { current: 0, longest: 0 }
+  ).longest;
+
+  practiceMatrixEl.innerHTML = `
+    <div class="matrix-row">
+      ${days
+        .map((day, index) => {
+          const count = counts[index];
+          const fill = hottest ? Math.round((count / hottest) * 100) : 0;
+          return `<span class="matrix-cell" title="${day}: ${count} run${count === 1 ? '' : 's'}" style="--fill:${fill}%">${day.slice(5)}</span>`;
+        })
+        .join('')}
+    </div>
+    <p><strong>Active days:</strong> ${activeDays}/14.</p>
+    <p><strong>Longest recent gap:</strong> ${longestGap} day${longestGap === 1 ? '' : 's'}.</p>
+    <p><strong>Coach cue:</strong> ${
+      activeDays >= 8
+        ? 'Consistency is solid. Use drills to target the weakest lane.'
+        : 'Your practice rhythm is patchy. Short daily reps will raise all-game scores faster than marathon sessions.'
+    }</p>
+  `;
+}
+
 function formatRunDate(date = new Date()) {
   return date.toISOString().slice(0, 10);
 }
@@ -443,6 +492,7 @@ function refreshScoreboard() {
   renderDailyDrill();
   renderCoverageBoard();
   renderProgressRadar();
+  renderPracticeMatrix();
 }
 
 function activateTab(gameId) {
