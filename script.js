@@ -20,6 +20,7 @@ const practiceMatrixEl = document.getElementById('practice-matrix');
 const gameTipsEl = document.getElementById('game-tips');
 const runHistoryEl = document.getElementById('run-history');
 const resetScoresBtn = document.getElementById('reset-scores');
+const shareChallengeBtn = document.getElementById('share-challenge');
 const exportScoresBtn = document.getElementById('export-scores');
 const importScoresBtn = document.getElementById('import-scores');
 const importScoresFile = document.getElementById('import-scores-file');
@@ -52,6 +53,29 @@ const scoreKey = 'mini_game_hub_scores_v3';
 const scores = loadScores();
 let currentCleanup = () => {};
 let currentDifficulty = 'standard';
+let initialGameId = 'reaction';
+
+function syncUrlState(gameId = document.querySelector('.tab.active')?.dataset.game || initialGameId) {
+  const params = new URLSearchParams(window.location.search);
+  params.set('game', gameId);
+  params.set('difficulty', currentDifficulty);
+  const nextUrl = `${window.location.pathname}?${params.toString()}`;
+  window.history.replaceState({}, '', nextUrl);
+}
+
+function hydrateFromUrlState() {
+  const params = new URLSearchParams(window.location.search);
+  const requestedDifficulty = params.get('difficulty');
+  if (requestedDifficulty && difficultyProfiles[requestedDifficulty]) {
+    currentDifficulty = requestedDifficulty;
+    difficultySelect.value = requestedDifficulty;
+  }
+
+  const requestedGame = params.get('game');
+  if (requestedGame && gameMeta[requestedGame]) {
+    initialGameId = requestedGame;
+  }
+}
 
 const difficultyProfiles = {
   casual: { reactionMin: 1200, reactionRange: 2400, memoryPairs: 5, sequenceDelay: 720, patternDuration: 28, patternSwitch: 720 },
@@ -509,6 +533,8 @@ function renderTips(gameId) {
 function setGame(gameId) {
   currentCleanup();
   currentCleanup = () => {};
+  initialGameId = gameId;
+  syncUrlState(gameId);
 
   activateTab(gameId);
   gameTitle.textContent = gameMeta[gameId].title;
@@ -1051,6 +1077,7 @@ tabs.forEach((button) => {
 
 difficultySelect.addEventListener('change', () => {
   currentDifficulty = difficultySelect.value;
+  syncUrlState();
   setGame(document.querySelector('.tab.active')?.dataset.game || 'reaction');
 });
 
@@ -1070,8 +1097,18 @@ resetScoresBtn.addEventListener('click', () => {
   gameNote.textContent = 'Scores reset. Start a new run.';
 });
 exportScoresBtn?.addEventListener('click', exportScores);
+shareChallengeBtn?.addEventListener('click', async () => {
+  syncUrlState();
+  try {
+    await navigator.clipboard.writeText(window.location.href);
+    gameNote.textContent = `Challenge link copied for ${gameMeta[initialGameId].title} on ${currentDifficulty} difficulty.`;
+  } catch (error) {
+    gameNote.textContent = 'Clipboard copy failed in this environment.';
+  }
+});
 importScoresBtn?.addEventListener('click', () => importScoresFile?.click());
 importScoresFile?.addEventListener('change', importScores);
 
+hydrateFromUrlState();
 refreshScoreboard();
-setGame('reaction');
+setGame(initialGameId);
