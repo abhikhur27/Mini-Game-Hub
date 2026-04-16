@@ -17,6 +17,7 @@ const dailyDrillEl = document.getElementById('daily-drill');
 const coverageBoardEl = document.getElementById('coverage-board');
 const progressRadarEl = document.getElementById('progress-radar');
 const practiceMatrixEl = document.getElementById('practice-matrix');
+const trainingPlanEl = document.getElementById('training-plan');
 const gameTipsEl = document.getElementById('game-tips');
 const runHistoryEl = document.getElementById('run-history');
 const resetScoresBtn = document.getElementById('reset-scores');
@@ -338,6 +339,35 @@ function renderCoverageBoard() {
   `;
 }
 
+function renderTrainingPlan() {
+  if (!trainingPlanEl) return;
+
+  const plan = [];
+  if (scores.bestReaction === null) {
+    plan.push('1. Set a reaction baseline with three back-to-back trials.');
+  } else if (scores.bestReaction > 220) {
+    plan.push(`1. Reaction Timer: trim ${(scores.bestReaction - 220).toFixed(0)} ms to reach the reflex unlock pace.`);
+  } else {
+    plan.push('1. Reaction Timer: keep the reflex lane warm with one calibration run.');
+  }
+
+  if (scores.memoryWins < 5) {
+    plan.push(`2. Memory Match: bank ${5 - scores.memoryWins} more clean win${5 - scores.memoryWins === 1 ? '' : 's'} for consistency.`);
+  } else if (scores.bestSequence < 8) {
+    plan.push(`2. Sequence Recall: push ${8 - scores.bestSequence} more round${8 - scores.bestSequence === 1 ? '' : 's'} to widen working-memory range.`);
+  } else {
+    plan.push('2. Sequence Recall: keep rhythm sharp with one full-depth attempt.');
+  }
+
+  if (scores.bestPattern < 20) {
+    plan.push(`3. Pattern Sprint: add ${20 - scores.bestPattern} more point${20 - scores.bestPattern === 1 ? '' : 's'} to round out the arcade profile.`);
+  } else {
+    plan.push('3. Pattern Sprint: close the session with one speed run to protect cursor accuracy.');
+  }
+
+  trainingPlanEl.innerHTML = plan.map((step) => `<p>${step}</p>`).join('');
+}
+
 function renderProgressRadar() {
   if (!progressRadarEl) return;
 
@@ -517,6 +547,7 @@ function refreshScoreboard() {
   renderCoverageBoard();
   renderProgressRadar();
   renderPracticeMatrix();
+  renderTrainingPlan();
 }
 
 function activateTab(gameId) {

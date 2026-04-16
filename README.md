@@ -42,6 +42,10 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
    - Shows which games have recent reps vs neglected practice.
    - Keeps the weakest lane visible without reading the full run log.
 
+12. **Training Plan**
+   - Converts the current profile into a three-step practice queue.
+   - Keeps the next score or achievement threshold visible by game.
+
 7. **Portable Scoreboards**
    - Export browser progress as JSON.
    - Re-import scores and run history on another machine.
