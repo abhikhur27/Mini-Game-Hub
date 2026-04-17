@@ -567,7 +567,7 @@ function addRunEntry(game, detail) {
 
   scores.runHistory = scores.runHistory.slice(0, 10);
   saveScores();
-  renderRunHistory();
+  refreshScoreboard();
 }
 
 function refreshScoreboard() {

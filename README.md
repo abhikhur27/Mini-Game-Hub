@@ -50,6 +50,9 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
    - Turns the current profile into one focused challenge tied to the weakest lane.
    - Uses streak state and difficulty to frame the next practice target.
 
+14. **Live Scoreboard Sync**
+   - Total runs, streak counters, coach panels, and run history now refresh after every logged run instead of only on personal-best updates.
+
 7. **Portable Scoreboards**
    - Export browser progress as JSON.
    - Re-import scores and run history on another machine.
