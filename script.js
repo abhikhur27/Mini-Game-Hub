@@ -18,6 +18,7 @@ const coverageBoardEl = document.getElementById('coverage-board');
 const progressRadarEl = document.getElementById('progress-radar');
 const practiceMatrixEl = document.getElementById('practice-matrix');
 const trainingPlanEl = document.getElementById('training-plan');
+const sessionChallengeEl = document.getElementById('session-challenge');
 const gameTipsEl = document.getElementById('game-tips');
 const runHistoryEl = document.getElementById('run-history');
 const resetScoresBtn = document.getElementById('reset-scores');
@@ -368,6 +369,45 @@ function renderTrainingPlan() {
   trainingPlanEl.innerHTML = plan.map((step) => `<p>${step}</p>`).join('');
 }
 
+function renderSessionChallenge() {
+  if (!sessionChallengeEl) return;
+
+  const lanes = [
+    {
+      label: 'Reaction Timer',
+      score: scores.bestReaction === null ? 0 : Math.max(0, Math.min(100, ((320 - scores.bestReaction) / 100) * 100)),
+      challenge:
+        scores.bestReaction === null
+          ? 'Run three trials and record your first benchmark.'
+          : `Beat ${(Math.max(180, scores.bestReaction - 15)).toFixed(0)} ms once.`,
+    },
+    {
+      label: 'Memory Match',
+      score: Math.min(100, (scores.memoryWins / 5) * 100),
+      challenge: `Clear ${Math.max(1, 5 - scores.memoryWins)} more clean board${Math.max(1, 5 - scores.memoryWins) === 1 ? '' : 's'}.`,
+    },
+    {
+      label: 'Sequence Recall',
+      score: Math.min(100, (scores.bestSequence / 8) * 100),
+      challenge: `Reach round ${Math.max(4, scores.bestSequence + 1)} on ${currentDifficulty} difficulty.`,
+    },
+    {
+      label: 'Pattern Sprint',
+      score: Math.min(100, (scores.bestPattern / 20) * 100),
+      challenge: `Post a ${Math.max(12, scores.bestPattern + 2)} point sprint without a long idle stretch.`,
+    },
+  ];
+
+  const weakest = [...lanes].sort((a, b) => a.score - b.score)[0];
+  const streaks = computeStreaks();
+  sessionChallengeEl.innerHTML = `
+    <p><strong>Focus lane:</strong> ${weakest.label}</p>
+    <p><strong>Challenge:</strong> ${weakest.challenge}</p>
+    <p><strong>Why now:</strong> It is your lowest-readiness lane on the current profile.</p>
+    <p><strong>Cadence cue:</strong> ${streaks.current >= 3 ? 'You have momentum; use this session to close a weakness.' : 'Build a short streak first, then push score targets.'}</p>
+  `;
+}
+
 function renderProgressRadar() {
   if (!progressRadarEl) return;
 
@@ -548,6 +588,7 @@ function refreshScoreboard() {
   renderProgressRadar();
   renderPracticeMatrix();
   renderTrainingPlan();
+  renderSessionChallenge();
 }
 
 function activateTab(gameId) {

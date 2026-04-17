@@ -46,6 +46,10 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
    - Converts the current profile into a three-step practice queue.
    - Keeps the next score or achievement threshold visible by game.
 
+13. **Session Challenge**
+   - Turns the current profile into one focused challenge tied to the weakest lane.
+   - Uses streak state and difficulty to frame the next practice target.
+
 7. **Portable Scoreboards**
    - Export browser progress as JSON.
    - Re-import scores and run history on another machine.
