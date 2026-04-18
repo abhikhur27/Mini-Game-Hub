@@ -17,6 +17,7 @@ const dailyDrillEl = document.getElementById('daily-drill');
 const coverageBoardEl = document.getElementById('coverage-board');
 const progressRadarEl = document.getElementById('progress-radar');
 const practiceMatrixEl = document.getElementById('practice-matrix');
+const consistencyForecastEl = document.getElementById('consistency-forecast');
 const trainingPlanEl = document.getElementById('training-plan');
 const sessionChallengeEl = document.getElementById('session-challenge');
 const gameTipsEl = document.getElementById('game-tips');
@@ -505,6 +506,39 @@ function renderPracticeMatrix() {
   `;
 }
 
+function renderConsistencyForecast() {
+  if (!consistencyForecastEl) return;
+
+  const streaks = computeStreaks();
+  const activeDays = new Set(scores.runCalendar).size;
+  const readinessRows = [
+    { label: 'Reaction Timer', value: scores.bestReaction === null ? 0 : Math.max(0, Math.min(100, ((320 - scores.bestReaction) / 100) * 100)) },
+    { label: 'Memory Match', value: Math.min(100, (scores.memoryWins / 5) * 100) },
+    { label: 'Sequence Recall', value: Math.min(100, (scores.bestSequence / 8) * 100) },
+    { label: 'Pattern Sprint', value: Math.min(100, (scores.bestPattern / 20) * 100) },
+  ];
+  const weakest = [...readinessRows].sort((a, b) => a.value - b.value)[0];
+  const rhythm =
+    streaks.current >= 4
+      ? 'Locked in'
+      : streaks.current >= 2
+        ? 'Building'
+        : 'Cold start';
+  const nextStep =
+    streaks.current >= 4
+      ? `Protect the streak and spend the next session on ${weakest.label}.`
+      : activeDays >= 6
+        ? `Rhythm exists, but ${weakest.label} still needs focused reps.`
+        : 'Practice cadence is the main bottleneck; short daily runs will move every lane faster.';
+
+  consistencyForecastEl.innerHTML = `
+    <p><strong>Practice rhythm:</strong> ${rhythm}</p>
+    <p><strong>Current streak:</strong> ${streaks.current} day${streaks.current === 1 ? '' : 's'} | <strong>Best:</strong> ${streaks.best} day${streaks.best === 1 ? '' : 's'}</p>
+    <p><strong>14-day footprint:</strong> ${activeDays} active day${activeDays === 1 ? '' : 's'} on this profile.</p>
+    <p><strong>Next forecast:</strong> ${nextStep}</p>
+  `;
+}
+
 function formatRunDate(date = new Date()) {
   return date.toISOString().slice(0, 10);
 }
@@ -587,6 +621,7 @@ function refreshScoreboard() {
   renderCoverageBoard();
   renderProgressRadar();
   renderPracticeMatrix();
+  renderConsistencyForecast();
   renderTrainingPlan();
   renderSessionChallenge();
 }
