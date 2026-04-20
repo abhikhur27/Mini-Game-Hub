@@ -24,6 +24,7 @@ const gameTipsEl = document.getElementById('game-tips');
 const runHistoryEl = document.getElementById('run-history');
 const resetScoresBtn = document.getElementById('reset-scores');
 const shareChallengeBtn = document.getElementById('share-challenge');
+const copyTrainingBriefBtn = document.getElementById('copy-training-brief');
 const exportScoresBtn = document.getElementById('export-scores');
 const importScoresBtn = document.getElementById('import-scores');
 const importScoresFile = document.getElementById('import-scores-file');
@@ -626,6 +627,28 @@ function refreshScoreboard() {
   renderSessionChallenge();
 }
 
+function buildTrainingBrief() {
+  const activeGameId = document.querySelector('.tab.active')?.dataset.game || initialGameId;
+  const streaks = computeStreaks();
+  return [
+    'Mini Game Hub Training Brief',
+    '',
+    `Active game: ${gameMeta[activeGameId]?.title || 'Reaction Timer'}`,
+    `Difficulty: ${currentDifficulty}`,
+    `Best reaction: ${bestReactionEl.textContent}`,
+    `Memory wins: ${memoryWinsEl.textContent}`,
+    `Best sequence: ${bestSequenceEl.textContent}`,
+    `Best pattern sprint: ${bestPatternEl.textContent}`,
+    `Current streak: ${streaks.current} day${streaks.current === 1 ? '' : 's'}`,
+    '',
+    `Coach: ${(trainingCoachEl?.textContent || '').replace(/\s+/g, ' ').trim()}`,
+    `Milestones: ${(milestoneBoardEl?.textContent || '').replace(/\s+/g, ' ').trim()}`,
+    `Training plan: ${(trainingPlanEl?.textContent || '').replace(/\s+/g, ' ').trim()}`,
+    `Session challenge: ${(sessionChallengeEl?.textContent || '').replace(/\s+/g, ' ').trim()}`,
+    `Share link: ${window.location.href}`,
+  ].join('\n');
+}
+
 function activateTab(gameId) {
   tabs.forEach((button) => {
     button.classList.toggle('active', button.dataset.game === gameId);
@@ -1209,6 +1232,15 @@ shareChallengeBtn?.addEventListener('click', async () => {
   try {
     await navigator.clipboard.writeText(window.location.href);
     gameNote.textContent = `Challenge link copied for ${gameMeta[initialGameId].title} on ${currentDifficulty} difficulty.`;
+  } catch (error) {
+    gameNote.textContent = 'Clipboard copy failed in this environment.';
+  }
+});
+copyTrainingBriefBtn?.addEventListener('click', async () => {
+  syncUrlState();
+  try {
+    await navigator.clipboard.writeText(buildTrainingBrief());
+    gameNote.textContent = 'Copied a training brief with coach cues, milestones, and the current challenge.';
   } catch (error) {
     gameNote.textContent = 'Clipboard copy failed in this environment.';
   }

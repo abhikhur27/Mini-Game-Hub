@@ -54,7 +54,10 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
    - Total runs, streak counters, coach panels, and run history now refresh after every logged run instead of only on personal-best updates.
 
 15. **Consistency Forecast**
-   - Converts streaks, active practice days, and weakest-lane readiness into a short cadence forecast.
+    - Converts streaks, active practice days, and weakest-lane readiness into a short cadence forecast.
+
+16. **Training Brief Export**
+    - Copies the current coach recommendation, training plan, milestone gap, and challenge link into one clipboard-ready note.
 
 7. **Portable Scoreboards**
    - Export browser progress as JSON.
