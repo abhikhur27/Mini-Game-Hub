@@ -89,6 +89,13 @@ python -m http.server 8000
 
 Open `http://localhost:8000`.
 
+## Portfolio Demo Path
+
+1. Start with Pattern Sprint because it creates visible score movement quickly.
+2. Open the coach, milestone board, and coverage board after a run.
+3. Change difficulty to show profile-aware recommendations.
+4. Use `Copy Training Brief` as the handoff artifact.
+
 ## GitHub Pages Compatibility
 
 - Static-only deployment.

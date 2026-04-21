@@ -322,6 +322,19 @@ button {
   transform: scale(1.02);
 }
 
+.demo-strip {
+  margin-top: 1rem;
+  border: 1px solid rgba(215, 222, 254, 0.28);
+  border-radius: 10px;
+  background: rgba(215, 222, 254, 0.08);
+  padding: 0.8rem 1rem;
+  color: var(--muted);
+}
+
+.demo-strip strong {
+  color: var(--text);
+}
+
 @media (max-width: 980px) {
   .layout { grid-template-columns: 1fr; }
   .stage { min-height: 340px; }
