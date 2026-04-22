@@ -18,6 +18,7 @@ const coverageBoardEl = document.getElementById('coverage-board');
 const progressRadarEl = document.getElementById('progress-radar');
 const practiceMatrixEl = document.getElementById('practice-matrix');
 const consistencyForecastEl = document.getElementById('consistency-forecast');
+const skillBalanceEl = document.getElementById('skill-balance');
 const trainingPlanEl = document.getElementById('training-plan');
 const sessionChallengeEl = document.getElementById('session-challenge');
 const gameTipsEl = document.getElementById('game-tips');
@@ -540,6 +541,28 @@ function renderConsistencyForecast() {
   `;
 }
 
+function renderSkillBalance() {
+  if (!skillBalanceEl) return;
+
+  const lanes = [
+    { label: 'Reaction', value: scores.bestReaction === null ? 0 : Math.max(0, Math.min(100, ((340 - scores.bestReaction) / 140) * 100)) },
+    { label: 'Memory', value: Math.min(100, (scores.memoryWins / 5) * 100) },
+    { label: 'Sequence', value: Math.min(100, (scores.bestSequence / 8) * 100) },
+    { label: 'Pattern', value: Math.min(100, (scores.bestPattern / 20) * 100) },
+  ];
+  const average = lanes.reduce((sum, lane) => sum + lane.value, 0) / lanes.length;
+  const weakest = [...lanes].sort((a, b) => a.value - b.value)[0];
+  const strongest = [...lanes].sort((a, b) => b.value - a.value)[0];
+  const spread = strongest.value - weakest.value;
+  const grade = average >= 85 && spread <= 25 ? 'Balanced' : spread >= 55 ? 'Lopsided' : 'Developing';
+
+  skillBalanceEl.innerHTML = `
+    <p><strong>${grade} profile</strong></p>
+    <p>Readiness average: ${average.toFixed(0)}%. Strongest lane: ${strongest.label}. Weakest lane: ${weakest.label}.</p>
+    <p>${spread >= 55 ? 'Practice should target the weakest lane before chasing new personal bests.' : 'The profile is close enough to rotate games without losing focus.'}</p>
+  `;
+}
+
 function formatRunDate(date = new Date()) {
   return date.toISOString().slice(0, 10);
 }
@@ -623,6 +646,7 @@ function refreshScoreboard() {
   renderProgressRadar();
   renderPracticeMatrix();
   renderConsistencyForecast();
+  renderSkillBalance();
   renderTrainingPlan();
   renderSessionChallenge();
 }

@@ -57,7 +57,10 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
     - Converts streaks, active practice days, and weakest-lane readiness into a short cadence forecast.
 
 16. **Training Brief Export**
-    - Copies the current coach recommendation, training plan, milestone gap, and challenge link into one clipboard-ready note.
+   - Copies the current coach recommendation, training plan, milestone gap, and challenge link into one clipboard-ready note.
+
+17. **Skill Balance Grade**
+   - Compares reaction, memory, sequence, and pattern readiness so practice targets the weakest lane before chasing isolated highs.
 
 7. **Portable Scoreboards**
    - Export browser progress as JSON.
