@@ -50,6 +50,10 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
    - Turns the current profile into one focused challenge tied to the weakest lane.
    - Uses streak state and difficulty to frame the next practice target.
 
+18. **Gauntlet Planner**
+   - Converts the current profile into a four-stop cross-game training route.
+   - Keeps one concrete score gate per game visible for portfolio walkthroughs.
+
 14. **Live Scoreboard Sync**
    - Total runs, streak counters, coach panels, and run history now refresh after every logged run instead of only on personal-best updates.
 
@@ -98,6 +102,7 @@ Open `http://localhost:8000`.
 2. Open the coach, milestone board, and coverage board after a run.
 3. Change difficulty to show profile-aware recommendations.
 4. Use `Copy Training Brief` as the handoff artifact.
+5. Run the Gauntlet Planner once to show how the profile turns into an intentional cross-game practice route.
 
 ## GitHub Pages Compatibility
 

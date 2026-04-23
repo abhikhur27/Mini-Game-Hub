@@ -21,6 +21,7 @@ const consistencyForecastEl = document.getElementById('consistency-forecast');
 const skillBalanceEl = document.getElementById('skill-balance');
 const trainingPlanEl = document.getElementById('training-plan');
 const sessionChallengeEl = document.getElementById('session-challenge');
+const gauntletPlannerEl = document.getElementById('gauntlet-planner');
 const gameTipsEl = document.getElementById('game-tips');
 const runHistoryEl = document.getElementById('run-history');
 const resetScoresBtn = document.getElementById('reset-scores');
@@ -411,6 +412,30 @@ function renderSessionChallenge() {
   `;
 }
 
+function renderGauntletPlanner() {
+  if (!gauntletPlannerEl) return;
+
+  const sequenceTarget = Math.max(4, Math.min(10, (scores.bestSequence || 0) + 1));
+  const patternTarget = Math.max(12, Math.min(24, (scores.bestPattern || 0) + 3));
+  const reactionTarget = scores.bestReaction === null ? 'set a first benchmark' : `beat ${Math.max(180, scores.bestReaction - 12).toFixed(0)} ms`;
+  const remainingMemoryWins = Math.max(0, 5 - scores.memoryWins);
+  const memoryTarget = remainingMemoryWins === 0 ? 'clear one board cleanly' : `bank ${Math.min(2, remainingMemoryWins)} more clean win${Math.min(2, remainingMemoryWins) === 1 ? '' : 's'}`;
+  const weakestLaneNote = (skillBalanceEl?.textContent || '').includes('weakest')
+    ? 'Keep extra reps on the weakest lane called out above.'
+    : 'Rotate through all four games once before replaying a favorite.';
+
+  gauntletPlannerEl.innerHTML = [
+    `1. Reaction Timer: ${reactionTarget}.`,
+    `2. Memory Match: ${memoryTarget}.`,
+    `3. Sequence Recall: reach round ${sequenceTarget}.`,
+    `4. Pattern Sprint: finish at ${patternTarget}+ points.`,
+    weakestLaneNote,
+    `Difficulty lock: ${currentDifficulty}.`,
+  ]
+    .map((line) => `<p>${line}</p>`)
+    .join('');
+}
+
 function renderProgressRadar() {
   if (!progressRadarEl) return;
 
@@ -649,6 +674,7 @@ function refreshScoreboard() {
   renderSkillBalance();
   renderTrainingPlan();
   renderSessionChallenge();
+  renderGauntletPlanner();
 }
 
 function buildTrainingBrief() {
@@ -669,6 +695,7 @@ function buildTrainingBrief() {
     `Milestones: ${(milestoneBoardEl?.textContent || '').replace(/\s+/g, ' ').trim()}`,
     `Training plan: ${(trainingPlanEl?.textContent || '').replace(/\s+/g, ' ').trim()}`,
     `Session challenge: ${(sessionChallengeEl?.textContent || '').replace(/\s+/g, ' ').trim()}`,
+    `Gauntlet planner: ${(gauntletPlannerEl?.textContent || '').replace(/\s+/g, ' ').trim()}`,
     `Share link: ${window.location.href}`,
   ].join('\n');
 }
