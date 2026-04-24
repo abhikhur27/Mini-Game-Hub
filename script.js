@@ -22,6 +22,7 @@ const skillBalanceEl = document.getElementById('skill-balance');
 const trainingPlanEl = document.getElementById('training-plan');
 const sessionChallengeEl = document.getElementById('session-challenge');
 const gauntletPlannerEl = document.getElementById('gauntlet-planner');
+const difficultyBriefEl = document.getElementById('difficulty-brief');
 const gameTipsEl = document.getElementById('game-tips');
 const runHistoryEl = document.getElementById('run-history');
 const resetScoresBtn = document.getElementById('reset-scores');
@@ -342,6 +343,25 @@ function renderCoverageBoard() {
     ${rows.map((row) => `<p><strong>${row.label}:</strong> ${row.runs} recent run${row.runs === 1 ? '' : 's'} | ${row.status}</p>`).join('')}
     <p><strong>Coverage cue:</strong> ${coldest.runs === 0 ? `You have not touched ${coldest.label} recently.` : `${coldest.label} is your least-played recent lane.`}</p>
   `;
+}
+
+function renderDifficultyBrief() {
+  if (!difficultyBriefEl) return;
+
+  const profile = difficultyProfiles[currentDifficulty];
+  const targets = {
+    reaction: scores.bestReaction === null ? `open with a clean sub-${profile.reactionMin + Math.round(profile.reactionRange * 0.35)} ms run` : `best reaction is ${Math.round(scores.bestReaction)} ms`,
+    memory: `memory boards expand to ${profile.memoryPairs} pair${profile.memoryPairs === 1 ? '' : 's'}`,
+    sequence: `sequence playback drops to ${profile.sequenceDelay} ms between flashes`,
+    pattern: `pattern sprint lasts ${profile.patternDuration}s with ${profile.patternSwitch} ms target shifts`,
+  };
+
+  difficultyBriefEl.innerHTML = [
+    `<p><strong>${currentDifficulty[0].toUpperCase()}${currentDifficulty.slice(1)} profile:</strong> difficulty changes every game, not just score targets.</p>`,
+    `<p><strong>Reaction:</strong> ${targets.reaction}.</p>`,
+    `<p><strong>Memory / Sequence:</strong> ${targets.memory}; ${targets.sequence}.</p>`,
+    `<p><strong>Pattern Sprint:</strong> ${targets.pattern}. Use this profile when sharing a challenge link so the run conditions are explicit.</p>`,
+  ].join('');
 }
 
 function renderTrainingPlan() {
@@ -668,6 +688,7 @@ function refreshScoreboard() {
   renderMilestoneBoard();
   renderDailyDrill();
   renderCoverageBoard();
+  renderDifficultyBrief();
   renderProgressRadar();
   renderPracticeMatrix();
   renderConsistencyForecast();
