@@ -18,6 +18,7 @@ const coverageBoardEl = document.getElementById('coverage-board');
 const progressRadarEl = document.getElementById('progress-radar');
 const practiceMatrixEl = document.getElementById('practice-matrix');
 const consistencyForecastEl = document.getElementById('consistency-forecast');
+const recoveryDrillEl = document.getElementById('recovery-drill');
 const skillBalanceEl = document.getElementById('skill-balance');
 const trainingPlanEl = document.getElementById('training-plan');
 const sessionChallengeEl = document.getElementById('session-challenge');
@@ -586,6 +587,43 @@ function renderConsistencyForecast() {
   `;
 }
 
+function renderRecoveryDrill() {
+  if (!recoveryDrillEl) return;
+
+  const readinessRows = [
+    { key: 'reaction', label: 'Reaction Timer', value: scores.bestReaction === null ? 0 : Math.max(0, Math.min(100, ((320 - scores.bestReaction) / 100) * 100)) },
+    { key: 'memory', label: 'Memory Match', value: Math.min(100, (scores.memoryWins / 5) * 100) },
+    { key: 'sequence', label: 'Sequence Recall', value: Math.min(100, (scores.bestSequence / 8) * 100) },
+    { key: 'pattern', label: 'Pattern Sprint', value: Math.min(100, (scores.bestPattern / 20) * 100) },
+  ];
+  const weakest = [...readinessRows].sort((a, b) => a.value - b.value)[0];
+  const lastRun = scores.runHistory[0] || null;
+  const profile = difficultyProfiles[currentDifficulty];
+
+  let drill = '';
+  if (weakest.key === 'reaction') {
+    drill = `Run three clean starts and try to break ${scores.bestReaction === null ? '300' : Math.max(180, Math.round(scores.bestReaction - 15))} ms under the ${currentDifficulty} profile (${profile.reactionMin}-${profile.reactionMin + profile.reactionRange} ms window).`;
+  } else if (weakest.key === 'memory') {
+    drill = `Clear one board without a miss on the ${profile.memoryPairs}-pair layout before switching games.`;
+  } else if (weakest.key === 'sequence') {
+    drill = `Survive one round past ${Math.max(3, scores.bestSequence)} with the faster ${profile.sequenceDelay} ms cue cadence.`;
+  } else {
+    drill = `Post a ${Math.max(12, scores.bestPattern + 2)}-point sprint before the ${profile.patternDuration}s timer expires.`;
+  }
+
+  const recoveryCue = !lastRun
+    ? 'No recent run logged yet, so start with the weakest lane.'
+    : lastRun.game === weakest.key
+      ? `Your latest run was already on ${weakest.label}; repeat it once immediately so the adjustment sticks.`
+      : `Your latest run was ${gameMeta[lastRun.game]?.title || lastRun.game}, but the bigger recovery opportunity is ${weakest.label}.`;
+
+  recoveryDrillEl.innerHTML = `
+    <p><strong>Recovery target:</strong> ${weakest.label}</p>
+    <p><strong>Drill:</strong> ${drill}</p>
+    <p><strong>Cue:</strong> ${recoveryCue}</p>
+  `;
+}
+
 function renderSkillBalance() {
   if (!skillBalanceEl) return;
 
@@ -692,6 +730,7 @@ function refreshScoreboard() {
   renderProgressRadar();
   renderPracticeMatrix();
   renderConsistencyForecast();
+  renderRecoveryDrill();
   renderSkillBalance();
   renderTrainingPlan();
   renderSessionChallenge();
@@ -713,6 +752,7 @@ function buildTrainingBrief() {
     `Current streak: ${streaks.current} day${streaks.current === 1 ? '' : 's'}`,
     '',
     `Coach: ${(trainingCoachEl?.textContent || '').replace(/\s+/g, ' ').trim()}`,
+    `Recovery drill: ${(recoveryDrillEl?.textContent || '').replace(/\s+/g, ' ').trim()}`,
     `Milestones: ${(milestoneBoardEl?.textContent || '').replace(/\s+/g, ' ').trim()}`,
     `Training plan: ${(trainingPlanEl?.textContent || '').replace(/\s+/g, ' ').trim()}`,
     `Session challenge: ${(sessionChallengeEl?.textContent || '').replace(/\s+/g, ' ').trim()}`,

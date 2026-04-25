@@ -60,6 +60,9 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
 15. **Consistency Forecast**
     - Converts streaks, active practice days, and weakest-lane readiness into a short cadence forecast.
 
+19. **Recovery Drill**
+    - Turns the weakest lane plus your latest run into one concrete bounce-back target.
+
 16. **Training Brief Export**
    - Copies the current coach recommendation, training plan, milestone gap, and challenge link into one clipboard-ready note.
 
