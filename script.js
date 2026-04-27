@@ -24,6 +24,7 @@ const trainingPlanEl = document.getElementById('training-plan');
 const sessionChallengeEl = document.getElementById('session-challenge');
 const gauntletPlannerEl = document.getElementById('gauntlet-planner');
 const momentumContractEl = document.getElementById('momentum-contract');
+const plateauBreakerEl = document.getElementById('plateau-breaker');
 const difficultyBriefEl = document.getElementById('difficulty-brief');
 const gameTipsEl = document.getElementById('game-tips');
 const runHistoryEl = document.getElementById('run-history');
@@ -484,6 +485,36 @@ function renderMomentumContract() {
   `;
 }
 
+function renderPlateauBreaker() {
+  if (!plateauBreakerEl) return;
+
+  const recent = scores.runHistory.slice(0, 5);
+  const counts = recent.reduce((acc, entry) => {
+    acc[entry.game] = (acc[entry.game] || 0) + 1;
+    return acc;
+  }, {});
+  const repeated = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+  const readinessRows = [
+    { key: 'reaction', label: 'Reaction Timer', value: scores.bestReaction === null ? 0 : Math.max(0, Math.min(100, ((320 - scores.bestReaction) / 100) * 100)), drill: 'run three back-to-back starts and only keep sub-260 ms reactions' },
+    { key: 'memory', label: 'Memory Match', value: Math.max(0, Math.min(100, (scores.memoryWins / 5) * 100)), drill: 'clear one board with zero misses before rotating away' },
+    { key: 'sequence', label: 'Sequence Recall', value: Math.max(0, Math.min(100, (scores.bestSequence / 8) * 100)), drill: 'push one round past your current ceiling, then stop' },
+    { key: 'pattern', label: 'Pattern Sprint', value: Math.max(0, Math.min(100, (scores.bestPattern / 20) * 100)), drill: 'play two short sprints and only count runs with fewer than three misses' },
+  ];
+  const weakest = [...readinessRows].sort((a, b) => a.value - b.value)[0];
+  const repeatedLabel = repeated ? gameMeta[repeated[0]]?.title || repeated[0] : 'none yet';
+  const plateauCue =
+    repeated && repeated[1] >= 3
+      ? `You have spent ${repeated[1]} of the last ${recent.length} runs on ${repeatedLabel}, so the profile is starting to narrow.`
+      : 'Recent reps are not overconcentrated yet, so the safest plateau breaker is still your weakest lane.';
+
+  plateauBreakerEl.innerHTML = `
+    <p><strong>Plateau breaker</strong></p>
+    <p>${plateauCue}</p>
+    <p><strong>Break move:</strong> switch to ${weakest.label} on ${currentDifficulty} and ${weakest.drill}.</p>
+    <p><strong>Why this works:</strong> it interrupts repetition without abandoning the lane with the most headroom.</p>
+  `;
+}
+
 function renderProgressRadar() {
   if (!progressRadarEl) return;
 
@@ -763,6 +794,7 @@ function refreshScoreboard() {
   renderSessionChallenge();
   renderGauntletPlanner();
   renderMomentumContract();
+  renderPlateauBreaker();
 }
 
 function buildTrainingBrief() {
@@ -785,6 +817,7 @@ function buildTrainingBrief() {
     `Training plan: ${(trainingPlanEl?.textContent || '').replace(/\s+/g, ' ').trim()}`,
     `Session challenge: ${(sessionChallengeEl?.textContent || '').replace(/\s+/g, ' ').trim()}`,
     `Gauntlet planner: ${(gauntletPlannerEl?.textContent || '').replace(/\s+/g, ' ').trim()}`,
+    `Plateau breaker: ${(plateauBreakerEl?.textContent || '').replace(/\s+/g, ' ').trim()}`,
     `Share link: ${window.location.href}`,
   ].join('\n');
 }
