@@ -23,6 +23,7 @@ const skillBalanceEl = document.getElementById('skill-balance');
 const trainingPlanEl = document.getElementById('training-plan');
 const sessionChallengeEl = document.getElementById('session-challenge');
 const gauntletPlannerEl = document.getElementById('gauntlet-planner');
+const momentumContractEl = document.getElementById('momentum-contract');
 const difficultyBriefEl = document.getElementById('difficulty-brief');
 const gameTipsEl = document.getElementById('game-tips');
 const runHistoryEl = document.getElementById('run-history');
@@ -457,6 +458,32 @@ function renderGauntletPlanner() {
     .join('');
 }
 
+function renderMomentumContract() {
+  if (!momentumContractEl) return;
+
+  const readinessRows = [
+    { label: 'Reaction Timer', value: scores.bestReaction === null ? 0 : Math.max(0, Math.min(100, ((320 - scores.bestReaction) / 100) * 100)) },
+    { label: 'Memory Match', value: Math.min(100, (scores.memoryWins / 5) * 100) },
+    { label: 'Sequence Recall', value: Math.min(100, (scores.bestSequence / 8) * 100) },
+    { label: 'Pattern Sprint', value: Math.min(100, (scores.bestPattern / 20) * 100) },
+  ];
+  const weakest = [...readinessRows].sort((a, b) => a.value - b.value)[0];
+  const streaks = computeStreaks();
+  const contract =
+    streaks.current >= 4
+      ? `Protect the streak with one ${weakest.label} rep before replaying your favorite game.`
+      : streaks.current >= 2
+        ? `Convert the mini-streak into a full practice week by opening with ${weakest.label}.`
+        : `Start a new streak tonight with one low-friction ${weakest.label} run.`;
+
+  momentumContractEl.innerHTML = `
+    <p><strong>Momentum contract</strong></p>
+    <p>${contract}</p>
+    <p><strong>Current streak:</strong> ${streaks.current} day${streaks.current === 1 ? '' : 's'} | <strong>Best:</strong> ${streaks.best} day${streaks.best === 1 ? '' : 's'}.</p>
+    <p><strong>Weak lane:</strong> ${weakest.label} still has the most room to move this profile.</p>
+  `;
+}
+
 function renderProgressRadar() {
   if (!progressRadarEl) return;
 
@@ -735,6 +762,7 @@ function refreshScoreboard() {
   renderTrainingPlan();
   renderSessionChallenge();
   renderGauntletPlanner();
+  renderMomentumContract();
 }
 
 function buildTrainingBrief() {

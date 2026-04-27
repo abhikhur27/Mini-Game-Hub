@@ -63,6 +63,9 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
 19. **Recovery Drill**
     - Turns the weakest lane plus your latest run into one concrete bounce-back target.
 
+20. **Momentum Contract**
+    - Converts your streak state and weakest lane into one keep-the-streak-alive commitment.
+
 16. **Training Brief Export**
    - Copies the current coach recommendation, training plan, milestone gap, and challenge link into one clipboard-ready note.
 
