@@ -118,6 +118,6 @@ Open `http://localhost:8000`.
 
 ## Future Improvements
 
-- Add difficulty presets per game.
-- Add shared achievements system.
+- Add another game that stresses route-planning or resource tradeoffs instead of pure reaction/memory.
+- Add cross-session trend charts for practice balance.
 - Add high-score leaderboard export.
