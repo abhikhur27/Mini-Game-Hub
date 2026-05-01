@@ -42,11 +42,19 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
    - Shows which games have recent reps vs neglected practice.
    - Keeps the weakest lane visible without reading the full run log.
 
-12. **Training Plan**
+12. **Practice Week + Radar**
+   - Practice Week shows day-by-day recent reps for cadence awareness.
+   - Progress Radar scores each game lane so streaks do not hide weak categories.
+
+13. **Practice Matrix**
+   - Converts current best scores into a lane-by-lane readiness matrix.
+   - Makes undertrained game/difficulty combinations visible at a glance.
+
+14. **Training Plan**
    - Converts the current profile into a three-step practice queue.
    - Keeps the next score or achievement threshold visible by game.
 
-13. **Session Challenge**
+15. **Session Challenge**
    - Turns the current profile into one focused challenge tied to the weakest lane.
    - Uses streak state and difficulty to frame the next practice target.
 
@@ -65,6 +73,12 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
 
 20. **Momentum Contract**
     - Converts your streak state and weakest lane into one keep-the-streak-alive commitment.
+
+21. **Plateau Breaker**
+   - Detects when one lane is stagnating and recommends a change of difficulty or practice pattern.
+
+22. **Difficulty Brief**
+   - Explains how the current difficulty profile changes timing, memory load, and practice expectations across all four games.
 
 16. **Training Brief Export**
    - Copies the current coach recommendation, training plan, milestone gap, and challenge link into one clipboard-ready note.
