@@ -15,6 +15,7 @@ const trainingCoachEl = document.getElementById('training-coach');
 const milestoneBoardEl = document.getElementById('milestone-board');
 const dailyDrillEl = document.getElementById('daily-drill');
 const coverageBoardEl = document.getElementById('coverage-board');
+const practiceWeekEl = document.getElementById('practice-week');
 const progressRadarEl = document.getElementById('progress-radar');
 const practiceMatrixEl = document.getElementById('practice-matrix');
 const consistencyForecastEl = document.getElementById('consistency-forecast');
@@ -345,6 +346,36 @@ function renderCoverageBoard() {
   coverageBoardEl.innerHTML = `
     ${rows.map((row) => `<p><strong>${row.label}:</strong> ${row.runs} recent run${row.runs === 1 ? '' : 's'} | ${row.status}</p>`).join('')}
     <p><strong>Coverage cue:</strong> ${coldest.runs === 0 ? `You have not touched ${coldest.label} recently.` : `${coldest.label} is your least-played recent lane.`}</p>
+  `;
+}
+
+function renderPracticeWeek() {
+  if (!practiceWeekEl) return;
+
+  const today = new Date();
+  const dayKeys = Array.from({ length: 7 }, (_, offset) => {
+    const day = new Date(today);
+    day.setDate(today.getDate() - (6 - offset));
+    return day.toISOString().slice(0, 10);
+  });
+
+  const dayCounts = dayKeys.map((key) => scores.runHistory.filter((entry) => entry.date === key).length);
+  const maxCount = Math.max(1, ...dayCounts);
+  const labels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  const strongestIndex = dayCounts.indexOf(Math.max(...dayCounts));
+  const activeDays = dayCounts.filter((count) => count > 0).length;
+
+  practiceWeekEl.innerHTML = `
+    <div class="week-strip">
+      ${dayCounts
+        .map((count, index) => {
+          const intensity = count === 0 ? 0.12 : 0.28 + (count / maxCount) * 0.52;
+          return `<span class="week-cell" title="${labels[index]}: ${count} run${count === 1 ? '' : 's'}" style="background: rgba(56, 189, 248, ${intensity.toFixed(2)});">${labels[index]}</span>`;
+        })
+        .join('')}
+    </div>
+    <p><strong>Coverage:</strong> ${activeDays}/7 active day${activeDays === 1 ? '' : 's'} in the last week.</p>
+    <p><strong>Peak day:</strong> ${dayCounts[strongestIndex] ? labels[strongestIndex] : 'None yet'} with ${dayCounts[strongestIndex] || 0} run${dayCounts[strongestIndex] === 1 ? '' : 's'}.</p>
   `;
 }
 
@@ -784,6 +815,7 @@ function refreshScoreboard() {
   renderMilestoneBoard();
   renderDailyDrill();
   renderCoverageBoard();
+  renderPracticeWeek();
   renderDifficultyBrief();
   renderProgressRadar();
   renderPracticeMatrix();

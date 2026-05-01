@@ -140,6 +140,24 @@ button {
   color: var(--accent);
 }
 
+.week-strip {
+  margin-bottom: 0.55rem;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.week-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+  color: #dbeafe;
+  font-weight: 700;
+}
+
 .matrix-row {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
