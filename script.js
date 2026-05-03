@@ -27,6 +27,7 @@ const gauntletPlannerEl = document.getElementById('gauntlet-planner');
 const momentumContractEl = document.getElementById('momentum-contract');
 const plateauBreakerEl = document.getElementById('plateau-breaker');
 const difficultyBriefEl = document.getElementById('difficulty-brief');
+const difficultyLaneBoardEl = document.getElementById('difficulty-lane-board');
 const gameTipsEl = document.getElementById('game-tips');
 const runHistoryEl = document.getElementById('run-history');
 const resetScoresBtn = document.getElementById('reset-scores');
@@ -94,16 +95,39 @@ const difficultyProfiles = {
   expert: { reactionMin: 650, reactionRange: 1700, memoryPairs: 8, sequenceDelay: 470, patternDuration: 22, patternSwitch: 480 },
 };
 
+function defaultDifficultyBests() {
+  return {
+    casual: { reaction: null, memory: 0, sequence: 0, pattern: 0 },
+    standard: { reaction: null, memory: 0, sequence: 0, pattern: 0 },
+    expert: { reaction: null, memory: 0, sequence: 0, pattern: 0 },
+  };
+}
+
 function defaultScores() {
   return {
     bestReaction: null,
     memoryWins: 0,
     bestSequence: 0,
     bestPattern: 0,
+    difficultyBests: defaultDifficultyBests(),
     runHistory: [],
     totalRuns: 0,
     runCalendar: [],
   };
+}
+
+function normalizeDifficultyBests(raw) {
+  const fallback = defaultDifficultyBests();
+  Object.keys(fallback).forEach((difficulty) => {
+    const entry = raw?.[difficulty] || {};
+    fallback[difficulty] = {
+      reaction: Number.isFinite(entry.reaction) ? entry.reaction : null,
+      memory: Number.isFinite(entry.memory) ? entry.memory : 0,
+      sequence: Number.isFinite(entry.sequence) ? entry.sequence : 0,
+      pattern: Number.isFinite(entry.pattern) ? entry.pattern : 0,
+    };
+  });
+  return fallback;
 }
 
 function loadScores() {
@@ -117,6 +141,7 @@ function loadScores() {
       memoryWins: Number.isFinite(raw.memoryWins) ? raw.memoryWins : 0,
       bestSequence: Number.isFinite(raw.bestSequence) ? raw.bestSequence : 0,
       bestPattern: Number.isFinite(raw.bestPattern) ? raw.bestPattern : 0,
+      difficultyBests: normalizeDifficultyBests(raw.difficultyBests),
       runHistory: Array.isArray(raw.runHistory) ? raw.runHistory.slice(0, 10) : [],
       totalRuns: Number.isFinite(raw.totalRuns) ? raw.totalRuns : 0,
       runCalendar: Array.isArray(raw.runCalendar) ? raw.runCalendar.slice(0, 90) : [],
@@ -161,6 +186,7 @@ function importScores(event) {
         memoryWins: Number.isFinite(imported.memoryWins) ? imported.memoryWins : 0,
         bestSequence: Number.isFinite(imported.bestSequence) ? imported.bestSequence : 0,
         bestPattern: Number.isFinite(imported.bestPattern) ? imported.bestPattern : 0,
+        difficultyBests: normalizeDifficultyBests(imported.difficultyBests),
         runHistory: Array.isArray(imported.runHistory) ? imported.runHistory.slice(0, 10) : [],
         totalRuns: Number.isFinite(imported.totalRuns) ? imported.totalRuns : 0,
         runCalendar: Array.isArray(imported.runCalendar) ? imported.runCalendar.slice(-90) : [],
@@ -395,6 +421,46 @@ function renderDifficultyBrief() {
     `<p><strong>Reaction:</strong> ${targets.reaction}.</p>`,
     `<p><strong>Memory / Sequence:</strong> ${targets.memory}; ${targets.sequence}.</p>`,
     `<p><strong>Pattern Sprint:</strong> ${targets.pattern}. Use this profile when sharing a challenge link so the run conditions are explicit.</p>`,
+  ].join('');
+}
+
+function updateDifficultyBest(track, value) {
+  const lane = scores.difficultyBests[currentDifficulty];
+  if (!lane) return;
+
+  if (track === 'reaction') {
+    lane.reaction = lane.reaction === null ? value : Math.min(lane.reaction, value);
+    return;
+  }
+
+  if (track === 'memory') {
+    lane.memory += value;
+    return;
+  }
+
+  lane[track] = Math.max(lane[track] || 0, value);
+}
+
+function renderDifficultyLaneBoard() {
+  if (!difficultyLaneBoardEl) return;
+
+  const lane = scores.difficultyBests[currentDifficulty] || defaultDifficultyBests()[currentDifficulty];
+  const strongest = Object.entries(scores.difficultyBests)
+    .map(([difficulty, values]) => ({
+      difficulty,
+      score:
+        (values.reaction === null ? 0 : Math.max(0, 360 - values.reaction)) +
+        values.memory * 18 +
+        values.sequence * 16 +
+        values.pattern * 10,
+    }))
+    .sort((a, b) => b.score - a.score)[0];
+
+  difficultyLaneBoardEl.innerHTML = [
+    `<p><strong>${currentDifficulty[0].toUpperCase()}${currentDifficulty.slice(1)} lane:</strong> shareable conditions now keep their own personal-best shelf.</p>`,
+    `<p><strong>Reaction:</strong> ${lane.reaction === null ? 'No benchmark yet' : `${Math.round(lane.reaction)} ms best`} | <strong>Memory:</strong> ${lane.memory} clear${lane.memory === 1 ? '' : 's'}</p>`,
+    `<p><strong>Sequence:</strong> Round ${lane.sequence} | <strong>Pattern Sprint:</strong> ${lane.pattern} point${lane.pattern === 1 ? '' : 's'}</p>`,
+    `<p><strong>Cross-profile cue:</strong> ${strongest?.difficulty === currentDifficulty ? 'This is currently your strongest conditions profile.' : `Your strongest lane today is ${strongest?.difficulty || 'not set yet'}, so this profile still has room to grow.`}</p>`,
   ].join('');
 }
 
@@ -817,6 +883,7 @@ function refreshScoreboard() {
   renderCoverageBoard();
   renderPracticeWeek();
   renderDifficultyBrief();
+  renderDifficultyLaneBoard();
   renderProgressRadar();
   renderPracticeMatrix();
   renderConsistencyForecast();
@@ -952,9 +1019,10 @@ function mountReactionGame() {
 
       if (scores.bestReaction === null || reactionTime < scores.bestReaction) {
         scores.bestReaction = reactionTime;
-        saveScores();
-        refreshScoreboard();
       }
+      updateDifficultyBest('reaction', reactionTime);
+      saveScores();
+      refreshScoreboard();
     }
   });
 
@@ -1070,6 +1138,7 @@ function mountMemoryGame() {
       const allMatched = cards.every((entry) => entry.matched);
       if (allMatched) {
         scores.memoryWins += 1;
+        updateDifficultyBest('memory', 1);
         saveScores();
         refreshScoreboard();
         message.textContent = 'Board completed. Nice memory run.';
@@ -1161,9 +1230,10 @@ function mountSequenceGame() {
     const completedRounds = Math.max(0, sequence.length - 1);
     if (completedRounds > scores.bestSequence) {
       scores.bestSequence = completedRounds;
-      saveScores();
-      refreshScoreboard();
     }
+    updateDifficultyBest('sequence', completedRounds);
+    saveScores();
+    refreshScoreboard();
   }
 
   function playbackSequence() {
@@ -1335,9 +1405,10 @@ function mountPatternGame() {
 
     if (score > scores.bestPattern) {
       scores.bestPattern = score;
-      saveScores();
-      refreshScoreboard();
     }
+    updateDifficultyBest('pattern', score);
+    saveScores();
+    refreshScoreboard();
 
     startButton.disabled = false;
     messageEl.textContent = `Sprint complete. Final score: ${score}.`;
