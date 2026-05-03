@@ -28,6 +28,7 @@ const momentumContractEl = document.getElementById('momentum-contract');
 const plateauBreakerEl = document.getElementById('plateau-breaker');
 const difficultyBriefEl = document.getElementById('difficulty-brief');
 const difficultyLaneBoardEl = document.getElementById('difficulty-lane-board');
+const breakthroughBoardEl = document.getElementById('breakthrough-board');
 const gameTipsEl = document.getElementById('game-tips');
 const runHistoryEl = document.getElementById('run-history');
 const resetScoresBtn = document.getElementById('reset-scores');
@@ -464,6 +465,21 @@ function renderDifficultyLaneBoard() {
   ].join('');
 }
 
+function renderBreakthroughBoard() {
+  if (!breakthroughBoardEl) return;
+
+  const lane = scores.difficultyBests[currentDifficulty] || defaultDifficultyBests()[currentDifficulty];
+  const options = [
+    { label: 'Reaction Timer', gap: lane.reaction === null ? 35 : Math.max(12, Math.round((lane.reaction - 180) / 2)), cue: lane.reaction === null ? 'post your first clean timed run' : `trim about ${Math.max(12, Math.round((lane.reaction - 180) / 2))} ms from your current best` },
+    { label: 'Memory Match', gap: Math.max(1, 5 - lane.memory), cue: `add ${Math.max(1, 5 - lane.memory)} more clean win${Math.max(1, 5 - lane.memory) === 1 ? '' : 's'} at this difficulty` },
+    { label: 'Sequence Recall', gap: Math.max(1, 8 - lane.sequence), cue: `push ${Math.max(1, 8 - lane.sequence)} more round${Math.max(1, 8 - lane.sequence) === 1 ? '' : 's'} deeper` },
+    { label: 'Pattern Sprint', gap: Math.max(1, 20 - lane.pattern), cue: `find ${Math.max(1, 20 - lane.pattern)} more point${Math.max(1, 20 - lane.pattern) === 1 ? '' : 's'} in one run` },
+  ].sort((a, b) => a.gap - b.gap);
+
+  const easiest = options[0];
+  breakthroughBoardEl.innerHTML = `<strong>Fastest next breakthrough:</strong> ${easiest.label}. ${easiest.cue}.`;
+}
+
 function renderTrainingPlan() {
   if (!trainingPlanEl) return;
 
@@ -884,6 +900,7 @@ function refreshScoreboard() {
   renderPracticeWeek();
   renderDifficultyBrief();
   renderDifficultyLaneBoard();
+  renderBreakthroughBoard();
   renderProgressRadar();
   renderPracticeMatrix();
   renderConsistencyForecast();
