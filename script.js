@@ -26,6 +26,7 @@ const sessionChallengeEl = document.getElementById('session-challenge');
 const gauntletPlannerEl = document.getElementById('gauntlet-planner');
 const momentumContractEl = document.getElementById('momentum-contract');
 const plateauBreakerEl = document.getElementById('plateau-breaker');
+const focusRiskBoardEl = document.getElementById('focus-risk-board');
 const difficultyBriefEl = document.getElementById('difficulty-brief');
 const difficultyLaneBoardEl = document.getElementById('difficulty-lane-board');
 const breakthroughBoardEl = document.getElementById('breakthrough-board');
@@ -628,6 +629,58 @@ function renderPlateauBreaker() {
   `;
 }
 
+function renderFocusRiskBoard() {
+  if (!focusRiskBoardEl) return;
+
+  const recent = scores.runHistory.slice(0, 6);
+  if (!recent.length) {
+    focusRiskBoardEl.innerHTML = '<p><strong>Focus risk:</strong> no practice profile yet. Log a few runs before the app can tell whether you are diversifying or tunneling.</p>';
+    return;
+  }
+
+  const laneCounts = recent.reduce((acc, entry) => {
+    const key = String(entry.game || '').toLowerCase();
+    if (key.includes('reaction')) acc.reaction += 1;
+    else if (key.includes('memory')) acc.memory += 1;
+    else if (key.includes('sequence')) acc.sequence += 1;
+    else if (key.includes('pattern')) acc.pattern += 1;
+    return acc;
+  }, { reaction: 0, memory: 0, sequence: 0, pattern: 0 });
+
+  const readinessRows = [
+    { key: 'reaction', label: 'Reaction Timer', value: scores.bestReaction === null ? 0 : Math.max(0, Math.min(100, ((320 - scores.bestReaction) / 100) * 100)) },
+    { key: 'memory', label: 'Memory Match', value: Math.min(100, (scores.memoryWins / 5) * 100) },
+    { key: 'sequence', label: 'Sequence Recall', value: Math.min(100, (scores.bestSequence / 8) * 100) },
+    { key: 'pattern', label: 'Pattern Sprint', value: Math.min(100, (scores.bestPattern / 20) * 100) },
+  ];
+
+  const mostRepeated = Object.entries(laneCounts).sort((a, b) => b[1] - a[1])[0];
+  const weakest = [...readinessRows].sort((a, b) => a.value - b.value)[0];
+  const overtrainedWeakLane = mostRepeated?.[0] === weakest?.key && mostRepeated[1] >= 3;
+  const neglectedWeakLane = mostRepeated?.[0] !== weakest?.key && (laneCounts[weakest.key] || 0) === 0;
+
+  let label = 'Balanced';
+  let cue = 'Recent reps are spreading well enough that no one lane is quietly starving.';
+  if (overtrainedWeakLane) {
+    label = 'Focused';
+    cue = `${weakest.label} is still the weakest lane, but you are already spending real reps there. Stay the course until a clean breakthrough lands.`;
+  } else if (neglectedWeakLane) {
+    label = 'Blind spot';
+    cue = `${weakest.label} is the weakest lane and has no recent reps. Open there before replaying a stronger game.`;
+  } else if ((mostRepeated?.[1] || 0) >= 4) {
+    const repeatedLabel = gameMeta[mostRepeated[0]]?.title || mostRepeated[0];
+    label = 'Tunnel risk';
+    cue = `${repeatedLabel} owns ${mostRepeated[1]} of the last ${recent.length} runs. Rotate once into ${weakest.label} so the profile does not narrow.`;
+  }
+
+  focusRiskBoardEl.innerHTML = `
+    <p><strong>Focus risk: ${label}</strong></p>
+    <p><strong>Weakest lane:</strong> ${weakest.label} at ${Math.round(weakest.value)}% readiness.</p>
+    <p><strong>Recent concentration:</strong> reaction ${laneCounts.reaction}, memory ${laneCounts.memory}, sequence ${laneCounts.sequence}, pattern ${laneCounts.pattern}.</p>
+    <p><strong>Cue:</strong> ${cue}</p>
+  `;
+}
+
 function renderProgressRadar() {
   if (!progressRadarEl) return;
 
@@ -911,6 +964,7 @@ function refreshScoreboard() {
   renderGauntletPlanner();
   renderMomentumContract();
   renderPlateauBreaker();
+  renderFocusRiskBoard();
 }
 
 function buildTrainingBrief() {
