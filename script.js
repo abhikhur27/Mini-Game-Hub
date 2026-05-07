@@ -27,6 +27,7 @@ const gauntletPlannerEl = document.getElementById('gauntlet-planner');
 const momentumContractEl = document.getElementById('momentum-contract');
 const plateauBreakerEl = document.getElementById('plateau-breaker');
 const focusRiskBoardEl = document.getElementById('focus-risk-board');
+const difficultyDebtBoardEl = document.getElementById('difficulty-debt-board');
 const difficultyBriefEl = document.getElementById('difficulty-brief');
 const difficultyLaneBoardEl = document.getElementById('difficulty-lane-board');
 const breakthroughBoardEl = document.getElementById('breakthrough-board');
@@ -681,6 +682,47 @@ function renderFocusRiskBoard() {
   `;
 }
 
+function renderDifficultyDebtBoard() {
+  if (!difficultyDebtBoardEl) return;
+
+  const currentLane = scores.difficultyBests[currentDifficulty] || defaultDifficultyBests()[currentDifficulty];
+  const strongest = Object.entries(scores.difficultyBests)
+    .map(([difficulty, values]) => ({
+      difficulty,
+      values,
+      score:
+        (values.reaction === null ? 0 : Math.max(0, 360 - values.reaction)) +
+        values.memory * 18 +
+        values.sequence * 16 +
+        values.pattern * 10,
+    }))
+    .sort((a, b) => b.score - a.score)[0];
+
+  const currentScore =
+    (currentLane.reaction === null ? 0 : Math.max(0, 360 - currentLane.reaction)) +
+    currentLane.memory * 18 +
+    currentLane.sequence * 16 +
+    currentLane.pattern * 10;
+  const debt = Math.max(0, (strongest?.score || 0) - currentScore);
+
+  if (!strongest || strongest.score === 0) {
+    difficultyDebtBoardEl.innerHTML = '<p><strong>Difficulty debt:</strong> no cross-profile baseline yet. Log runs on at least one difficulty so the app can compare where this profile is lagging.</p>';
+    return;
+  }
+
+  const sameProfile = strongest.difficulty === currentDifficulty;
+  const cue = sameProfile
+    ? 'This profile is currently your strongest conditions set, so the next job is preserving balance rather than catching up.'
+    : `Your ${strongest.difficulty} profile is ahead by ${debt} readiness points, so this difficulty still needs intentional reps before it becomes portfolio-shareable.`;
+
+  difficultyDebtBoardEl.innerHTML = `
+    <p><strong>Difficulty debt</strong></p>
+    <p><strong>Current profile:</strong> ${currentDifficulty} at ${currentScore} readiness points.</p>
+    <p><strong>Strongest profile:</strong> ${strongest.difficulty} at ${strongest.score} points.</p>
+    <p><strong>Debt cue:</strong> ${cue}</p>
+  `;
+}
+
 function renderProgressRadar() {
   if (!progressRadarEl) return;
 
@@ -965,6 +1007,7 @@ function refreshScoreboard() {
   renderMomentumContract();
   renderPlateauBreaker();
   renderFocusRiskBoard();
+  renderDifficultyDebtBoard();
 }
 
 function buildTrainingBrief() {
