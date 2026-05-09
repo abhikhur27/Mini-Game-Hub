@@ -29,6 +29,7 @@ const plateauBreakerEl = document.getElementById('plateau-breaker');
 const focusRiskBoardEl = document.getElementById('focus-risk-board');
 const difficultyDebtBoardEl = document.getElementById('difficulty-debt-board');
 const sessionHeatBoardEl = document.getElementById('session-heat-board');
+const practiceDriftBoardEl = document.getElementById('practice-drift-board');
 const difficultyBriefEl = document.getElementById('difficulty-brief');
 const difficultyLaneBoardEl = document.getElementById('difficulty-lane-board');
 const breakthroughBoardEl = document.getElementById('breakthrough-board');
@@ -757,6 +758,50 @@ function renderSessionHeatBoard() {
   `;
 }
 
+function renderPracticeDriftBoard() {
+  if (!practiceDriftBoardEl) return;
+
+  const recent = scores.runHistory.slice(0, 6);
+  if (!recent.length) {
+    practiceDriftBoardEl.innerHTML = '<p><strong>Practice drift:</strong> no recent runs yet. Log a few attempts before the app can tell whether the session is sharpening or just looping.</p>';
+    return;
+  }
+
+  const laneCounts = recent.reduce((acc, entry) => {
+    const key = String(entry.game || '').toLowerCase();
+    if (key.includes('reaction')) acc.reaction += 1;
+    else if (key.includes('memory')) acc.memory += 1;
+    else if (key.includes('sequence')) acc.sequence += 1;
+    else if (key.includes('pattern')) acc.pattern += 1;
+    return acc;
+  }, { reaction: 0, memory: 0, sequence: 0, pattern: 0 });
+
+  const readinessRows = [
+    { key: 'reaction', label: 'Reaction Timer', value: scores.bestReaction === null ? 0 : Math.max(0, Math.min(100, ((320 - scores.bestReaction) / 100) * 100)) },
+    { key: 'memory', label: 'Memory Match', value: Math.min(100, (scores.memoryWins / 5) * 100) },
+    { key: 'sequence', label: 'Sequence Recall', value: Math.min(100, (scores.bestSequence / 8) * 100) },
+    { key: 'pattern', label: 'Pattern Sprint', value: Math.min(100, (scores.bestPattern / 20) * 100) },
+  ];
+
+  const dominant = Object.entries(laneCounts).sort((a, b) => b[1] - a[1])[0];
+  const weakest = [...readinessRows].sort((a, b) => a.value - b.value)[0];
+  const driftShare = dominant[1] / recent.length;
+  const weakestCoverage = laneCounts[weakest.key] || 0;
+  const dominantLabel = gameMeta[dominant[0]]?.title || dominant[0];
+
+  practiceDriftBoardEl.innerHTML = `
+    <p><strong>Practice drift:</strong> ${dominantLabel} owns ${Math.round(driftShare * 100)}% of the last ${recent.length} run${recent.length === 1 ? '' : 's'}.</p>
+    <p><strong>Weakest lane coverage:</strong> ${weakest.label} appears ${weakestCoverage} time${weakestCoverage === 1 ? '' : 's'} in that same window.</p>
+    <p><strong>Cue:</strong> ${
+      driftShare >= 0.67 && weakestCoverage === 0
+        ? `You are drifting toward comfort reps. Force one ${weakest.label} run next before the session stops improving the weakest lane.`
+        : driftShare >= 0.67
+          ? `The session is still concentrated, but the weak lane is present. Add one different game before closing the loop.`
+          : 'The recent mix is varied enough that practice breadth is still supporting the scoreboard.'
+    }</p>
+  `;
+}
+
 function renderProgressRadar() {
   if (!progressRadarEl) return;
 
@@ -1043,6 +1088,7 @@ function refreshScoreboard() {
   renderFocusRiskBoard();
   renderDifficultyDebtBoard();
   renderSessionHeatBoard();
+  renderPracticeDriftBoard();
 }
 
 function buildTrainingBrief() {

@@ -74,6 +74,10 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
 20. **Momentum Contract**
     - Converts your streak state and weakest lane into one keep-the-streak-alive commitment.
 
+21. **Practice Drift**
+   - Detects when recent runs collapse into one comfort game.
+   - Keeps weakest-lane coverage visible so session variety does not become accidental.
+
 21. **Plateau Breaker**
    - Detects when one lane is stagnating and recommends a change of difficulty or practice pattern.
 
