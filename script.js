@@ -28,6 +28,7 @@ const momentumContractEl = document.getElementById('momentum-contract');
 const plateauBreakerEl = document.getElementById('plateau-breaker');
 const focusRiskBoardEl = document.getElementById('focus-risk-board');
 const difficultyDebtBoardEl = document.getElementById('difficulty-debt-board');
+const sessionHeatBoardEl = document.getElementById('session-heat-board');
 const difficultyBriefEl = document.getElementById('difficulty-brief');
 const difficultyLaneBoardEl = document.getElementById('difficulty-lane-board');
 const breakthroughBoardEl = document.getElementById('breakthrough-board');
@@ -723,6 +724,39 @@ function renderDifficultyDebtBoard() {
   `;
 }
 
+function renderSessionHeatBoard() {
+  if (!sessionHeatBoardEl) return;
+
+  const recent = scores.runHistory.slice(0, 6);
+  if (!recent.length) {
+    sessionHeatBoardEl.innerHTML = '<p><strong>Session heat:</strong> no recent runs yet. Log a few attempts so the app can tell which lane is actually active.</p>';
+    return;
+  }
+
+  const laneCounts = recent.reduce((acc, entry) => {
+    const key = String(entry.game || '').toLowerCase();
+    if (key.includes('reaction')) acc.reaction += 1;
+    else if (key.includes('memory')) acc.memory += 1;
+    else if (key.includes('sequence')) acc.sequence += 1;
+    else if (key.includes('pattern')) acc.pattern += 1;
+    return acc;
+  }, { reaction: 0, memory: 0, sequence: 0, pattern: 0 });
+
+  const hottest = Object.entries(laneCounts).sort((a, b) => b[1] - a[1])[0];
+  const coldest = Object.entries(laneCounts).sort((a, b) => a[1] - b[1])[0];
+  const hottestLabel = gameMeta[hottest[0]]?.title || hottest[0];
+  const coldestLabel = gameMeta[coldest[0]]?.title || coldest[0];
+  const spread = hottest[1] - coldest[1];
+  const heatLabel = spread >= 3 ? 'Lopsided' : spread >= 2 ? 'Tilted' : 'Even';
+
+  sessionHeatBoardEl.innerHTML = `
+    <p><strong>Session heat: ${heatLabel}</strong></p>
+    <p><strong>Hottest lane:</strong> ${hottestLabel} with ${hottest[1]} of the last ${recent.length} runs.</p>
+    <p><strong>Coldest lane:</strong> ${coldestLabel} with ${coldest[1]} recent reps.</p>
+    <p><strong>Cue:</strong> ${spread >= 3 ? `Open ${coldestLabel} next so the profile widens before the hot lane becomes a rut.` : 'Recent practice is fairly distributed, so the next run can stay goal-driven instead of balance-driven.'}</p>
+  `;
+}
+
 function renderProgressRadar() {
   if (!progressRadarEl) return;
 
@@ -1008,6 +1042,7 @@ function refreshScoreboard() {
   renderPlateauBreaker();
   renderFocusRiskBoard();
   renderDifficultyDebtBoard();
+  renderSessionHeatBoard();
 }
 
 function buildTrainingBrief() {

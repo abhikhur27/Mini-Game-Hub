@@ -81,6 +81,9 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
    - Explains how the current difficulty profile changes timing, memory load, and practice expectations across all four games.
 23. **Breakthrough Board**
    - Highlights the easiest next personal-best jump for the currently selected difficulty.
+24. **Session Heat**
+   - Reads the latest run mix as a hot-vs-cold lane map.
+   - Keeps the next underplayed lane visible before practice narrows.
 
 16. **Training Brief Export**
    - Copies the current coach recommendation, training plan, milestone gap, and challenge link into one clipboard-ready note.
