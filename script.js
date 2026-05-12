@@ -24,6 +24,7 @@ const skillBalanceEl = document.getElementById('skill-balance');
 const trainingPlanEl = document.getElementById('training-plan');
 const sessionChallengeEl = document.getElementById('session-challenge');
 const gauntletPlannerEl = document.getElementById('gauntlet-planner');
+const portfolioHandoffEl = document.getElementById('portfolio-handoff');
 const momentumContractEl = document.getElementById('momentum-contract');
 const plateauBreakerEl = document.getElementById('plateau-breaker');
 const focusRiskBoardEl = document.getElementById('focus-risk-board');
@@ -576,6 +577,29 @@ function renderGauntletPlanner() {
     .join('');
 }
 
+function renderPortfolioHandoff() {
+  if (!portfolioHandoffEl) return;
+
+  const readinessRows = [
+    { label: 'Reaction Timer', value: scores.bestReaction === null ? 0 : Math.max(0, Math.min(100, ((320 - scores.bestReaction) / 100) * 100)) },
+    { label: 'Memory Match', value: Math.min(100, (scores.memoryWins / 5) * 100) },
+    { label: 'Sequence Recall', value: Math.min(100, (scores.bestSequence / 8) * 100) },
+    { label: 'Pattern Sprint', value: Math.min(100, (scores.bestPattern / 20) * 100) },
+  ];
+  const strongest = [...readinessRows].sort((a, b) => b.value - a.value)[0];
+  const weakest = [...readinessRows].sort((a, b) => a.value - b.value)[0];
+  const recentGames = [...new Set(scores.runHistory.slice(0, 4).map((entry) => entry.game))]
+    .map((game) => gameMeta[game]?.title || game)
+    .filter(Boolean);
+
+  portfolioHandoffEl.innerHTML = `
+    <p><strong>Showcase lane:</strong> ${strongest.label} is currently the clearest thing to open first on ${currentDifficulty}.</p>
+    <p><strong>Weak lane:</strong> ${weakest.label} still has the most visible headroom before this profile reads balanced.</p>
+    <p><strong>Recent route:</strong> ${recentGames.length ? recentGames.join(' -> ') : 'No recent route yet. Start a game to seed one.'}</p>
+    <p><strong>Handoff cue:</strong> ${scores.totalRuns >= 8 ? 'The profile is broad enough to share as a deliberate arcade snapshot.' : 'Add a few more cross-game reps before exporting this as a balanced portfolio artifact.'}</p>
+  `;
+}
+
 function renderMomentumContract() {
   if (!momentumContractEl) return;
 
@@ -1083,6 +1107,7 @@ function refreshScoreboard() {
   renderTrainingPlan();
   renderSessionChallenge();
   renderGauntletPlanner();
+  renderPortfolioHandoff();
   renderMomentumContract();
   renderPlateauBreaker();
   renderFocusRiskBoard();

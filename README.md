@@ -58,6 +58,9 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
    - Turns the current profile into one focused challenge tied to the weakest lane.
    - Uses streak state and difficulty to frame the next practice target.
 
+16. **Portfolio Handoff**
+   - Converts the current score profile into a strongest-lane, weakest-lane, and recent-route summary before sharing the arcade as a portfolio artifact.
+
 18. **Gauntlet Planner**
    - Converts the current profile into a four-stop cross-game training route.
    - Keeps one concrete score gate per game visible for portfolio walkthroughs.
