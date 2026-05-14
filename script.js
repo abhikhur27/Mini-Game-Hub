@@ -39,6 +39,7 @@ const runHistoryEl = document.getElementById('run-history');
 const resetScoresBtn = document.getElementById('reset-scores');
 const shareChallengeBtn = document.getElementById('share-challenge');
 const copyTrainingBriefBtn = document.getElementById('copy-training-brief');
+const copyRecoveryDrillBtn = document.getElementById('copy-recovery-drill');
 const exportScoresBtn = document.getElementById('export-scores');
 const importScoresBtn = document.getElementById('import-scores');
 const importScoresFile = document.getElementById('import-scores-file');
@@ -1141,6 +1142,18 @@ function buildTrainingBrief() {
   ].join('\n');
 }
 
+function buildRecoveryDrillBrief() {
+  return [
+    'Mini Game Hub Recovery Drill',
+    '',
+    `Difficulty: ${currentDifficulty}`,
+    `Recovery drill: ${(recoveryDrillEl?.textContent || '').replace(/\s+/g, ' ').trim()}`,
+    `Session challenge: ${(sessionChallengeEl?.textContent || '').replace(/\s+/g, ' ').trim()}`,
+    `Momentum contract: ${(momentumContractEl?.textContent || '').replace(/\s+/g, ' ').trim()}`,
+    `Current view: ${window.location.href}`,
+  ].join('\n');
+}
+
 function activateTab(gameId) {
   tabs.forEach((button) => {
     button.classList.toggle('active', button.dataset.game === gameId);
@@ -1737,6 +1750,15 @@ copyTrainingBriefBtn?.addEventListener('click', async () => {
   try {
     await navigator.clipboard.writeText(buildTrainingBrief());
     gameNote.textContent = 'Copied a training brief with coach cues, milestones, and the current challenge.';
+  } catch (error) {
+    gameNote.textContent = 'Clipboard copy failed in this environment.';
+  }
+});
+copyRecoveryDrillBtn?.addEventListener('click', async () => {
+  syncUrlState();
+  try {
+    await navigator.clipboard.writeText(buildRecoveryDrillBrief());
+    gameNote.textContent = 'Copied the recovery drill and bounce-back plan.';
   } catch (error) {
     gameNote.textContent = 'Clipboard copy failed in this environment.';
   }
