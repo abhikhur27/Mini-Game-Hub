@@ -26,6 +26,7 @@ const sessionChallengeEl = document.getElementById('session-challenge');
 const gauntletPlannerEl = document.getElementById('gauntlet-planner');
 const portfolioHandoffEl = document.getElementById('portfolio-handoff');
 const momentumContractEl = document.getElementById('momentum-contract');
+const crossTrainingPairEl = document.getElementById('cross-training-pair');
 const plateauBreakerEl = document.getElementById('plateau-breaker');
 const focusRiskBoardEl = document.getElementById('focus-risk-board');
 const difficultyDebtBoardEl = document.getElementById('difficulty-debt-board');
@@ -627,6 +628,33 @@ function renderMomentumContract() {
   `;
 }
 
+function renderCrossTrainingPair() {
+  if (!crossTrainingPairEl) return;
+
+  const lanes = [
+    { key: 'reaction', label: 'Reaction Timer', value: scores.bestReaction === null ? 0 : Math.max(0, Math.min(100, ((320 - scores.bestReaction) / 100) * 100)) },
+    { key: 'memory', label: 'Memory Match', value: Math.min(100, (scores.memoryWins / 5) * 100) },
+    { key: 'sequence', label: 'Sequence Recall', value: Math.min(100, (scores.bestSequence / 8) * 100) },
+    { key: 'pattern', label: 'Pattern Sprint', value: Math.min(100, (scores.bestPattern / 20) * 100) },
+  ];
+  const weakest = [...lanes].sort((a, b) => a.value - b.value)[0];
+  const strongest = [...lanes].sort((a, b) => b.value - a.value)[0];
+  const recent = scores.runHistory.slice(0, 6);
+  const hotCounts = recent.reduce((acc, entry) => {
+    acc[entry.game] = (acc[entry.game] || 0) + 1;
+    return acc;
+  }, {});
+  const dominant = Object.entries(hotCounts).sort((a, b) => b[1] - a[1])[0];
+  const dominantLabel = dominant ? gameMeta[dominant[0]]?.title || dominant[0] : 'No hot lane yet';
+
+  crossTrainingPairEl.innerHTML = `
+    <p><strong>Open with:</strong> ${weakest.label}</p>
+    <p><strong>Follow with:</strong> ${strongest.label}</p>
+    <p><strong>Why this pair:</strong> The first run raises the weakest readiness lane; the second lets you consolidate the session with your cleanest strength.</p>
+    <p><strong>Heat check:</strong> ${dominant ? `${dominantLabel} is currently the hottest recent lane.` : 'Log a few runs first to give the pair a stronger recent-history context.'}</p>
+  `;
+}
+
 function renderPlateauBreaker() {
   if (!plateauBreakerEl) return;
 
@@ -1110,6 +1138,7 @@ function refreshScoreboard() {
   renderGauntletPlanner();
   renderPortfolioHandoff();
   renderMomentumContract();
+  renderCrossTrainingPair();
   renderPlateauBreaker();
   renderFocusRiskBoard();
   renderDifficultyDebtBoard();

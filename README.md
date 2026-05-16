@@ -77,6 +77,9 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
 20. **Momentum Contract**
     - Converts your streak state and weakest lane into one keep-the-streak-alive commitment.
 
+21. **Cross-Training Pair**
+   - Pairs the weakest lane with the strongest lane so one session can widen the profile before consolidating it.
+
 21. **Practice Drift**
    - Detects when recent runs collapse into one comfort game.
    - Keeps weakest-lane coverage visible so session variety does not become accidental.
