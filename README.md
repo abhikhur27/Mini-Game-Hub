@@ -34,7 +34,11 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
    - Shows the exact gap to each remaining achievement threshold.
    - Keeps the next target visible without reading the whole achievement list.
 
-10. **Today's Drill**
+10. **Achievement Route**
+   - Picks the single fastest remaining achievement path from the current score profile.
+   - Keeps the next move and practice warning visible without reading every milestone.
+
+11. **Today's Drill**
    - Rotates a focused practice target by day.
    - Shows whether the current profile has already cleared the drill goal.
 

@@ -13,6 +13,7 @@ const bestStreakEl = document.getElementById('best-streak');
 const achievementList = document.getElementById('achievement-list');
 const trainingCoachEl = document.getElementById('training-coach');
 const milestoneBoardEl = document.getElementById('milestone-board');
+const achievementRouteBoardEl = document.getElementById('achievement-route-board');
 const dailyDrillEl = document.getElementById('daily-drill');
 const coverageBoardEl = document.getElementById('coverage-board');
 const practiceWeekEl = document.getElementById('practice-week');
@@ -311,6 +312,63 @@ function renderMilestoneBoard() {
   milestoneBoardEl.innerHTML = targets.length
     ? targets.map((target) => `<p>${target}</p>`).join('')
     : '<strong>All milestone targets cleared.</strong><br>Rotate games at higher difficulty to keep the profile balanced.';
+}
+
+function renderAchievementRouteBoard() {
+  if (!achievementRouteBoardEl) return;
+
+  const routes = [];
+  if (scores.bestReaction === null || scores.bestReaction > 220) {
+    const gap = scores.bestReaction === null ? 999 : scores.bestReaction - 220;
+    routes.push({
+      gap,
+      title: 'Lightning Reflex',
+      lane: 'Reaction Timer',
+      move: scores.bestReaction === null ? 'Log one baseline run, then start chasing sub-220 ms.' : `Trim ${Math.ceil(scores.bestReaction - 220)} ms from the current best time.`,
+      watch: 'Short attempts with full reset beat spam clicking here.',
+    });
+  }
+  if (scores.memoryWins < 5) {
+    routes.push({
+      gap: 5 - scores.memoryWins,
+      title: 'Memory Master',
+      lane: 'Memory Match',
+      move: `Clear ${5 - scores.memoryWins} more board${5 - scores.memoryWins === 1 ? '' : 's'} to lock the achievement.`,
+      watch: 'Preserve corners and known pairs so each flip reduces uncertainty instead of restarting the search.',
+    });
+  }
+  if (scores.bestSequence < 8) {
+    routes.push({
+      gap: 8 - scores.bestSequence,
+      title: 'Sequence Savant',
+      lane: 'Sequence Recall',
+      move: `Push ${8 - scores.bestSequence} more round${8 - scores.bestSequence === 1 ? '' : 's'} from the current ceiling.`,
+      watch: 'Chunk the rhythm, not the colors one-by-one.',
+    });
+  }
+  if (scores.bestPattern < 20) {
+    routes.push({
+      gap: 20 - scores.bestPattern,
+      title: 'Pattern Sprinter',
+      lane: 'Pattern Sprint',
+      move: `Find ${20 - scores.bestPattern} more point${20 - scores.bestPattern === 1 ? '' : 's'} on the best run.`,
+      watch: 'Keep the cursor centered so travel distance stays low.',
+    });
+  }
+
+  if (!routes.length) {
+    achievementRouteBoardEl.innerHTML = '<strong>Full achievement sweep complete.</strong><br>Use expert difficulty and the gauntlet planner to keep the profile from narrowing into one comfort lane.';
+    return;
+  }
+
+  routes.sort((a, b) => a.gap - b.gap);
+  const bestRoute = routes[0];
+  achievementRouteBoardEl.innerHTML = `
+    <strong>${bestRoute.title}</strong><br>
+    Fastest lane: ${bestRoute.lane}<br>
+    Next move: ${bestRoute.move}<br>
+    ${bestRoute.watch}
+  `;
 }
 
 function getDailyDrill() {
@@ -1122,6 +1180,7 @@ function refreshScoreboard() {
   renderRunHistory();
   renderTrainingCoach();
   renderMilestoneBoard();
+  renderAchievementRouteBoard();
   renderDailyDrill();
   renderCoverageBoard();
   renderPracticeWeek();
