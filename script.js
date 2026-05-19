@@ -33,6 +33,7 @@ const focusRiskBoardEl = document.getElementById('focus-risk-board');
 const difficultyDebtBoardEl = document.getElementById('difficulty-debt-board');
 const sessionHeatBoardEl = document.getElementById('session-heat-board');
 const practiceDriftBoardEl = document.getElementById('practice-drift-board');
+const nextBreakthroughBoardEl = document.getElementById('next-breakthrough-board');
 const difficultyBriefEl = document.getElementById('difficulty-brief');
 const difficultyLaneBoardEl = document.getElementById('difficulty-lane-board');
 const breakthroughBoardEl = document.getElementById('breakthrough-board');
@@ -743,6 +744,58 @@ function renderPlateauBreaker() {
   `;
 }
 
+function renderNextBreakthroughBoard() {
+  if (!nextBreakthroughBoardEl) return;
+
+  const profile = difficultyProfiles[currentDifficulty] || difficultyProfiles.standard;
+  const candidates = [];
+
+  candidates.push({
+    label: 'Reaction Timer',
+    gap: Math.max(0, 250 - scores.reactionBest),
+    move: scores.reactionBest >= 250
+      ? `Already inside the fast lane at ${scores.reactionBest} ms. Protect consistency on the ${profile.reactionLabel} setup.`
+      : `Cut ${Math.max(1, 250 - scores.reactionBest)} ms off the current best to re-enter the fast lane.`,
+  });
+  candidates.push({
+    label: 'Memory Match',
+    gap: Math.max(0, 5 - scores.memoryWins),
+    move: scores.memoryWins >= 5
+      ? 'Memory Master is banked. Chase a cleaner board on the larger layout.'
+      : `Clear ${Math.max(1, 5 - scores.memoryWins)} more clean board${Math.max(1, 5 - scores.memoryWins) === 1 ? '' : 's'} to close the achievement gap.`,
+  });
+  candidates.push({
+    label: 'Sequence Recall',
+    gap: Math.max(0, 10 - scores.sequenceBest),
+    move: scores.sequenceBest >= 10
+      ? `The round ceiling is already ${scores.sequenceBest}. Hold depth under the ${profile.sequenceLength}-step cadence.`
+      : `Add ${Math.max(1, 10 - scores.sequenceBest)} more round${Math.max(1, 10 - scores.sequenceBest) === 1 ? '' : 's'} before rotating away.`,
+  });
+  candidates.push({
+    label: 'Pattern Sprint',
+    gap: Math.max(0, 20 - scores.patternBest),
+    move: scores.patternBest >= 20
+      ? `Pattern Sprint is already above the all-rounder floor. Push for a cleaner run on ${profile.patternTarget} targets.`
+      : `Score ${Math.max(1, 20 - scores.patternBest)} more point${Math.max(1, 20 - scores.patternBest) === 1 ? '' : 's'} to turn this lane into a reliable contributor.`,
+  });
+
+  candidates.sort((left, right) => left.gap - right.gap);
+  const queue = candidates.slice(0, 3);
+
+  nextBreakthroughBoardEl.innerHTML = `
+    <p><strong>Closest unlocks:</strong> ${queue.map((item) => item.label).join(' -> ')}</p>
+    <ul class="achievement-list">
+      ${queue
+        .map(
+          (item, index) =>
+            `<li><strong>${index + 1}. ${item.label}</strong> ${item.move}</li>`
+        )
+        .join('')}
+    </ul>
+    <p><strong>Cadence note:</strong> Use this queue when you want the next three gains that are easiest to explain in a portfolio walkthrough, not the biggest long-shot score jumps.</p>
+  `;
+}
+
 function renderFocusRiskBoard() {
   if (!focusRiskBoardEl) return;
 
@@ -1199,6 +1252,7 @@ function refreshScoreboard() {
   renderMomentumContract();
   renderCrossTrainingPair();
   renderPlateauBreaker();
+  renderNextBreakthroughBoard();
   renderFocusRiskBoard();
   renderDifficultyDebtBoard();
   renderSessionHeatBoard();
