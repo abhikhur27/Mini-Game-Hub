@@ -43,6 +43,7 @@ const resetScoresBtn = document.getElementById('reset-scores');
 const shareChallengeBtn = document.getElementById('share-challenge');
 const copyTrainingBriefBtn = document.getElementById('copy-training-brief');
 const copyRecoveryDrillBtn = document.getElementById('copy-recovery-drill');
+const copyGauntletPlanBtn = document.getElementById('copy-gauntlet-plan');
 const exportScoresBtn = document.getElementById('export-scores');
 const importScoresBtn = document.getElementById('import-scores');
 const importScoresFile = document.getElementById('import-scores-file');
@@ -1296,6 +1297,21 @@ function buildRecoveryDrillBrief() {
   ].join('\n');
 }
 
+function buildGauntletPlanBrief() {
+  const activeGameId = document.querySelector('.tab.active')?.dataset.game || initialGameId;
+  return [
+    'Mini Game Hub Gauntlet Plan',
+    '',
+    `Active game: ${gameMeta[activeGameId]?.title || 'Reaction Timer'}`,
+    `Difficulty: ${currentDifficulty}`,
+    `Gauntlet planner: ${(gauntletPlannerEl?.textContent || '').replace(/\s+/g, ' ').trim()}`,
+    `Portfolio handoff: ${(portfolioHandoffEl?.textContent || '').replace(/\s+/g, ' ').trim()}`,
+    `Cross-training pair: ${(crossTrainingPairEl?.textContent || '').replace(/\s+/g, ' ').trim()}`,
+    `Session heat: ${(sessionHeatBoardEl?.textContent || '').replace(/\s+/g, ' ').trim()}`,
+    `Current view: ${window.location.href}`,
+  ].join('\n');
+}
+
 function activateTab(gameId) {
   tabs.forEach((button) => {
     button.classList.toggle('active', button.dataset.game === gameId);
@@ -1902,6 +1918,14 @@ copyRecoveryDrillBtn?.addEventListener('click', async () => {
     await navigator.clipboard.writeText(buildRecoveryDrillBrief());
     gameNote.textContent = 'Copied the recovery drill and bounce-back plan.';
   } catch (error) {
+    gameNote.textContent = 'Clipboard copy failed in this environment.';
+  }
+});
+copyGauntletPlanBtn?.addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(buildGauntletPlanBrief());
+    gameNote.textContent = 'Copied the gauntlet plan with the current training route and portfolio handoff.';
+  } catch {
     gameNote.textContent = 'Clipboard copy failed in this environment.';
   }
 });
