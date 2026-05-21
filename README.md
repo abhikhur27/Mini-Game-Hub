@@ -102,6 +102,9 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
 16. **Training Brief Export**
    - Copies the current coach recommendation, training plan, milestone gap, and challenge link into one clipboard-ready note.
 
+18. **Run Log Export**
+   - Downloads the latest recorded runs as CSV for spreadsheet or practice-review workflows.
+
 17. **Skill Balance Grade**
    - Compares reaction, memory, sequence, and pattern readiness so practice targets the weakest lane before chasing isolated highs.
 
@@ -118,6 +121,19 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
 - `index.html`: shell layout + game tabs + scoreboard.
 - `styles.css`: responsive arcade UI and reusable component styles.
 - `script.js`: modular game mounts with cleanup hooks and localStorage persistence.
+
+## Local Run
+
+```bash
+python -m http.server 8000
+```
+
+Open `http://localhost:8000`.
+
+## Portfolio Positioning
+
+- Honest label: browser arcade collection.
+- Strongest use: show one or two games plus the cross-game progression layer, not every panel in one sitting.
 
 ```mermaid
 flowchart TD

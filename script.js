@@ -44,6 +44,7 @@ const shareChallengeBtn = document.getElementById('share-challenge');
 const copyTrainingBriefBtn = document.getElementById('copy-training-brief');
 const copyRecoveryDrillBtn = document.getElementById('copy-recovery-drill');
 const copyGauntletPlanBtn = document.getElementById('copy-gauntlet-plan');
+const exportRunLogBtn = document.getElementById('export-run-log');
 const exportScoresBtn = document.getElementById('export-scores');
 const importScoresBtn = document.getElementById('import-scores');
 const importScoresFile = document.getElementById('import-scores-file');
@@ -181,6 +182,28 @@ function exportScores() {
   anchor.click();
   URL.revokeObjectURL(url);
   gameNote.textContent = 'Exported scoreboard JSON.';
+}
+
+function exportRunLog() {
+  if (!scores.runHistory.length) {
+    gameNote.textContent = 'Log a few runs before exporting the run history.';
+    return;
+  }
+
+  const rows = ['date,time,game,detail'];
+  scores.runHistory.forEach((entry) => {
+    const escapedDetail = `"${String(entry.detail || '').replace(/"/g, '""')}"`;
+    rows.push([entry.date, entry.time, entry.game, escapedDetail].join(','));
+  });
+
+  const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = `mini-game-hub-run-log-${currentDifficulty}.csv`;
+  anchor.click();
+  URL.revokeObjectURL(url);
+  gameNote.textContent = 'Exported the current run log as CSV.';
 }
 
 function importScores(event) {
@@ -1894,6 +1917,7 @@ resetScoresBtn.addEventListener('click', () => {
   gameNote.textContent = 'Scores reset. Start a new run.';
 });
 exportScoresBtn?.addEventListener('click', exportScores);
+exportRunLogBtn?.addEventListener('click', exportRunLog);
 shareChallengeBtn?.addEventListener('click', async () => {
   syncUrlState();
   try {
