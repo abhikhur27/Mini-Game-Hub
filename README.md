@@ -134,6 +134,7 @@ Open `http://localhost:8000`.
 
 - Honest label: browser arcade collection.
 - Strongest use: show one or two games plus the cross-game progression layer, not every panel in one sitting.
+- Treat the coaching surfaces as support material, not the main event. A short run plus one follow-up brief is the cleanest public walkthrough.
 
 ```mermaid
 flowchart TD
