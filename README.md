@@ -160,6 +160,13 @@ Open `http://localhost:8000`.
 4. Use `Copy Training Brief` as the handoff artifact.
 5. Run the Gauntlet Planner once to show how the profile turns into an intentional cross-game practice route.
 
+## Practice Artifact Workflow
+
+- `Copy Challenge Link` is for reopening one focused training state quickly.
+- `Copy Training Brief` is for a short portfolio walkthrough or coach-style handoff.
+- `Copy Recovery Drill` is the better export when the story is about a weak lane instead of the strongest one.
+- `Export Scores` plus `Export Run Log CSV` is the reproducibility path when the arcade profile should survive beyond one browser session.
+
 ## GitHub Pages Compatibility
 
 - Static-only deployment.
