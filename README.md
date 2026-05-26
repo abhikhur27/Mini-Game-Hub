@@ -178,3 +178,13 @@ Open `http://localhost:8000`.
 - Add another game that stresses route-planning or resource tradeoffs instead of pure reaction/memory.
 - Add cross-session trend charts for practice balance.
 - Add high-score leaderboard export.
+
+## Portfolio Recording Script
+
+For cleaner demo footage, use this order:
+
+1. Pattern Sprint (1 short run) for immediate scoring feedback.
+2. Sequence Recall (1 failure + 1 recovery run) to show adaptation.
+3. Open coach and achievement layers once, then export one `Copy Training Brief`.
+
+This keeps the walkthrough concise while still proving cross-game tracking quality.
