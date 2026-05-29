@@ -154,7 +154,14 @@ function loadScores() {
       bestSequence: Number.isFinite(raw.bestSequence) ? raw.bestSequence : 0,
       bestPattern: Number.isFinite(raw.bestPattern) ? raw.bestPattern : 0,
       difficultyBests: normalizeDifficultyBests(raw.difficultyBests),
-      runHistory: Array.isArray(raw.runHistory) ? raw.runHistory.slice(0, 10) : [],
+      runHistory: Array.isArray(raw.runHistory)
+        ? raw.runHistory.slice(0, 10).map((entry) => ({
+          ...entry,
+          difficulty: typeof entry?.difficulty === 'string' && difficultyProfiles[entry.difficulty]
+            ? entry.difficulty
+            : 'standard',
+        }))
+        : [],
       totalRuns: Number.isFinite(raw.totalRuns) ? raw.totalRuns : 0,
       runCalendar: Array.isArray(raw.runCalendar) ? raw.runCalendar.slice(0, 90) : [],
     };
@@ -165,6 +172,10 @@ function loadScores() {
 
 function saveScores() {
   localStorage.setItem(scoreKey, JSON.stringify(scores));
+}
+
+function csvEscape(value) {
+  return `"${String(value ?? '').replace(/"/g, '""')}"`;
 }
 
 function exportScores() {
@@ -190,10 +201,15 @@ function exportRunLog() {
     return;
   }
 
-  const rows = ['date,time,game,detail'];
+  const rows = ['date,time,game,difficulty,detail'];
   scores.runHistory.forEach((entry) => {
-    const escapedDetail = `"${String(entry.detail || '').replace(/"/g, '""')}"`;
-    rows.push([entry.date, entry.time, entry.game, escapedDetail].join(','));
+    rows.push([
+      csvEscape(entry.date),
+      csvEscape(entry.time),
+      csvEscape(entry.game),
+      csvEscape(entry.difficulty || 'standard'),
+      csvEscape(entry.detail),
+    ].join(','));
   });
 
   const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
@@ -221,7 +237,14 @@ function importScores(event) {
         bestSequence: Number.isFinite(imported.bestSequence) ? imported.bestSequence : 0,
         bestPattern: Number.isFinite(imported.bestPattern) ? imported.bestPattern : 0,
         difficultyBests: normalizeDifficultyBests(imported.difficultyBests),
-        runHistory: Array.isArray(imported.runHistory) ? imported.runHistory.slice(0, 10) : [],
+        runHistory: Array.isArray(imported.runHistory)
+          ? imported.runHistory.slice(0, 10).map((entry) => ({
+            ...entry,
+            difficulty: typeof entry?.difficulty === 'string' && difficultyProfiles[entry.difficulty]
+              ? entry.difficulty
+              : 'standard',
+          }))
+          : [],
         totalRuns: Number.isFinite(imported.totalRuns) ? imported.totalRuns : 0,
         runCalendar: Array.isArray(imported.runCalendar) ? imported.runCalendar.slice(-90) : [],
       });
@@ -282,7 +305,7 @@ function renderRunHistory() {
   }
 
   runHistoryEl.innerHTML = scores.runHistory
-    .map((entry) => `<li>${entry.time} | ${entry.game}: ${entry.detail}</li>`)
+    .map((entry) => `<li>${entry.time} | ${entry.game} (${entry.difficulty || 'standard'}): ${entry.detail}</li>`)
     .join('');
 }
 
@@ -1236,6 +1259,7 @@ function addRunEntry(game, detail) {
     time: new Date().toLocaleTimeString(),
     date: today,
     game,
+    difficulty: currentDifficulty,
     detail,
   });
 
