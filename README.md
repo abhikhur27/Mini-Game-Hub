@@ -189,3 +189,9 @@ For cleaner demo footage, use this order:
 3. Open coach and achievement layers once, then export one `Copy Training Brief`.
 
 This keeps the walkthrough concise while still proving cross-game tracking quality.
+
+## Quick Verification Command
+
+Run this syntax check before sharing updates:
+- node --check script.js
+
