@@ -1931,6 +1931,18 @@ window.addEventListener('keydown', (event) => {
   const gameId = shortcutMap[event.key];
   if (gameId) {
     setGame(gameId);
+    return;
+  }
+
+  if (event.key.toLowerCase() === 't') {
+    event.preventDefault();
+    copyTrainingBriefBtn?.click();
+    return;
+  }
+
+  if (event.key.toLowerCase() === 'g') {
+    event.preventDefault();
+    copyGauntletPlanBtn?.click();
   }
 });
 

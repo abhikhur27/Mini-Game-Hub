@@ -37,6 +37,7 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
 10. **Achievement Route**
    - Picks the single fastest remaining achievement path from the current score profile.
    - Keeps the next move and practice warning visible without reading every milestone.
+   - Keyboard shortcuts: `T` copies the current training brief and `G` copies the current gauntlet plan.
 
 11. **Today's Drill**
    - Rotates a focused practice target by day.
