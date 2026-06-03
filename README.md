@@ -30,14 +30,20 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
    - Reads recent runs and milestone gaps.
    - Suggests the next game to practice for balanced improvement.
 
-9. **Milestone Board**
+7. **Milestone Board**
    - Shows the exact gap to each remaining achievement threshold.
    - Keeps the next target visible without reading the whole achievement list.
 
-10. **Achievement Route**
+8. **Achievement Route**
    - Picks the single fastest remaining achievement path from the current score profile.
    - Keeps the next move and practice warning visible without reading every milestone.
    - Keyboard shortcuts: `T` copies the current training brief and `G` copies the current gauntlet plan.
+
+## Export and handoff
+
+- Export scores when you want a compact progression snapshot.
+- Export the run log when you need detailed session history.
+- Copy the training brief or gauntlet plan when you want a concise next-step recommendation instead of raw score data.
 
 11. **Today's Drill**
    - Rotates a focused practice target by day.
