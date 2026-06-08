@@ -39,6 +39,12 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
    - Keeps the next move and practice warning visible without reading every milestone.
    - Keyboard shortcuts: `T` copies the current training brief and `G` copies the current gauntlet plan.
 
+## Demo Flow
+
+1. Play two short runs across different games.
+2. Open the training coach and achievement route surfaces.
+3. Export the run log or copy the training brief to show the app as a repeatable practice tracker.
+
 ## Export and handoff
 
 - Export scores when you want a compact progression snapshot.
