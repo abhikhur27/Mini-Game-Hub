@@ -1,4 +1,4 @@
-# Mini Game Hub
+# Mini Browser Arcade
 
 Portfolio-grade browser arcade featuring four interactive games, difficulty presets, persistent scores, and achievements.
 
