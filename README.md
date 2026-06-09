@@ -202,6 +202,10 @@ For cleaner demo footage, use this order:
 
 This keeps the walkthrough concise while still proving cross-game tracking quality.
 
+## Public Demo Guardrail
+
+Do not try to show every coach surface in one sitting. One fast game, one follow-up recommendation, and one export artifact is the cleanest believable walkthrough.
+
 ## Quick Verification Command
 
 Run this syntax check before sharing updates:
