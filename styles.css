@@ -213,6 +213,17 @@ button {
   display: none;
 }
 
+body.focus-mode .focus-optional {
+  display: none !important;
+}
+
+body.focus-mode #toggle-focus-mode {
+  background: var(--accent);
+  color: #0f1320;
+  border-color: transparent;
+  font-weight: 700;
+}
+
 .stage-panel { padding: 0.9rem; }
 
 .stage-head p {

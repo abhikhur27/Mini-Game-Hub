@@ -129,6 +129,10 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
    - `Space` / `Enter` can start and resolve reaction trials.
    - Pattern Sprint supports a keyboard tile layout for faster replay.
 
+9. **Portfolio Focus Mode**
+   - Hides the noisier coach panels and keeps only the core demo surfaces visible.
+   - Makes walkthroughs cleaner without deleting the deeper training dashboard.
+
 ## Technical Design
 
 - `index.html`: shell layout + game tabs + scoreboard.

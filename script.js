@@ -49,6 +49,7 @@ const exportScoresBtn = document.getElementById('export-scores');
 const importScoresBtn = document.getElementById('import-scores');
 const importScoresFile = document.getElementById('import-scores-file');
 const difficultySelect = document.getElementById('difficulty-select');
+const focusModeBtn = document.getElementById('toggle-focus-mode');
 
 const gameMeta = {
   reaction: {
@@ -74,10 +75,58 @@ const gameMeta = {
 };
 
 const scoreKey = 'mini_game_hub_scores_v3';
+const focusModeKey = 'mini_game_hub_focus_mode_v1';
 const scores = loadScores();
 let currentCleanup = () => {};
 let currentDifficulty = 'standard';
 let initialGameId = 'reaction';
+let focusModeEnabled = localStorage.getItem(focusModeKey) === 'true';
+
+const focusOptionalIds = [
+  'achievement-route-board',
+  'daily-drill',
+  'practice-week',
+  'progress-radar',
+  'practice-matrix',
+  'consistency-forecast',
+  'recovery-drill',
+  'skill-balance',
+  'training-plan',
+  'session-challenge',
+  'gauntlet-planner',
+  'portfolio-handoff',
+  'momentum-contract',
+  'cross-training-pair',
+  'plateau-breaker',
+  'next-breakthrough-board',
+  'focus-risk-board',
+  'difficulty-debt-board',
+  'session-heat-board',
+  'practice-drift-board',
+  'difficulty-lane-board',
+  'breakthrough-board',
+  'copy-recovery-drill',
+  'copy-gauntlet-plan',
+];
+
+function markFocusOptionalElements() {
+  focusOptionalIds.forEach((id) => {
+    const element = document.getElementById(id);
+    if (!element) return;
+    element.classList.add('focus-optional');
+    const label = element.previousElementSibling;
+    if (label && /^(H2|LABEL)$/.test(label.tagName)) {
+      label.classList.add('focus-optional');
+    }
+  });
+}
+
+function applyFocusMode() {
+  document.body.classList.toggle('focus-mode', focusModeEnabled);
+  if (focusModeBtn) {
+    focusModeBtn.textContent = focusModeEnabled ? 'Exit Focus Mode' : 'Portfolio Focus Mode';
+  }
+}
 
 function syncUrlState(gameId = document.querySelector('.tab.active')?.dataset.game || initialGameId) {
   const params = new URLSearchParams(window.location.search);
@@ -1991,7 +2040,17 @@ copyGauntletPlanBtn?.addEventListener('click', async () => {
 });
 importScoresBtn?.addEventListener('click', () => importScoresFile?.click());
 importScoresFile?.addEventListener('change', importScores);
+focusModeBtn?.addEventListener('click', () => {
+  focusModeEnabled = !focusModeEnabled;
+  localStorage.setItem(focusModeKey, String(focusModeEnabled));
+  applyFocusMode();
+  gameNote.textContent = focusModeEnabled
+    ? 'Portfolio focus mode enabled. The sidebar now keeps only the core walkthrough surfaces.'
+    : 'Portfolio focus mode disabled. Full training dashboard restored.';
+});
 
 hydrateFromUrlState();
+markFocusOptionalElements();
+applyFocusMode();
 refreshScoreboard();
 setGame(initialGameId);
