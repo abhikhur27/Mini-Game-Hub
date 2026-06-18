@@ -25,6 +25,7 @@ const skillBalanceEl = document.getElementById('skill-balance');
 const trainingPlanEl = document.getElementById('training-plan');
 const sessionChallengeEl = document.getElementById('session-challenge');
 const gauntletPlannerEl = document.getElementById('gauntlet-planner');
+const sessionRouteEl = document.getElementById('session-route');
 const portfolioHandoffEl = document.getElementById('portfolio-handoff');
 const momentumContractEl = document.getElementById('momentum-contract');
 const crossTrainingPairEl = document.getElementById('cross-training-pair');
@@ -44,6 +45,9 @@ const shareChallengeBtn = document.getElementById('share-challenge');
 const copyTrainingBriefBtn = document.getElementById('copy-training-brief');
 const copyRecoveryDrillBtn = document.getElementById('copy-recovery-drill');
 const copyGauntletPlanBtn = document.getElementById('copy-gauntlet-plan');
+const startSessionRouteBtn = document.getElementById('start-session-route');
+const advanceSessionRouteBtn = document.getElementById('advance-session-route');
+const resetSessionRouteBtn = document.getElementById('reset-session-route');
 const exportRunLogBtn = document.getElementById('export-run-log');
 const exportScoresBtn = document.getElementById('export-scores');
 const importScoresBtn = document.getElementById('import-scores');
@@ -76,11 +80,13 @@ const gameMeta = {
 
 const scoreKey = 'mini_game_hub_scores_v3';
 const focusModeKey = 'mini_game_hub_focus_mode_v1';
+const sessionRouteKey = 'mini_game_hub_session_route_v1';
 const scores = loadScores();
 let currentCleanup = () => {};
 let currentDifficulty = 'standard';
 let initialGameId = 'reaction';
 let focusModeEnabled = localStorage.getItem(focusModeKey) === 'true';
+let sessionRouteState = { active: false, completed: false, stepIndex: 0, difficulty: 'standard', steps: [] };
 
 const focusOptionalIds = [
   'achievement-route-board',
@@ -155,6 +161,7 @@ const difficultyProfiles = {
   standard: { reactionMin: 900, reactionRange: 2200, memoryPairs: 6, sequenceDelay: 600, patternDuration: 25, patternSwitch: 620 },
   expert: { reactionMin: 650, reactionRange: 1700, memoryPairs: 8, sequenceDelay: 470, patternDuration: 22, patternSwitch: 480 },
 };
+sessionRouteState = loadSessionRouteState();
 
 function defaultDifficultyBests() {
   return {
@@ -221,6 +228,34 @@ function loadScores() {
 
 function saveScores() {
   localStorage.setItem(scoreKey, JSON.stringify(scores));
+}
+
+function loadSessionRouteState() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(sessionRouteKey));
+    if (!raw || !Array.isArray(raw.steps)) {
+      return { active: false, completed: false, stepIndex: 0, difficulty: 'standard', steps: [] };
+    }
+    return {
+      active: Boolean(raw.active),
+      completed: Boolean(raw.completed),
+      stepIndex: Number.isFinite(raw.stepIndex) ? raw.stepIndex : 0,
+      difficulty: typeof raw.difficulty === 'string' && difficultyProfiles[raw.difficulty] ? raw.difficulty : 'standard',
+      steps: raw.steps
+        .filter((step) => step && typeof step.gameId === 'string' && gameMeta[step.gameId])
+        .map((step) => ({
+          gameId: step.gameId,
+          title: step.title || gameMeta[step.gameId].title,
+          goal: String(step.goal || ''),
+        })),
+    };
+  } catch (error) {
+    return { active: false, completed: false, stepIndex: 0, difficulty: 'standard', steps: [] };
+  }
+}
+
+function saveSessionRouteState() {
+  localStorage.setItem(sessionRouteKey, JSON.stringify(sessionRouteState));
 }
 
 function csvEscape(value) {
@@ -732,6 +767,96 @@ function renderGauntletPlanner() {
   ]
     .map((line) => `<p>${line}</p>`)
     .join('');
+}
+
+function buildSessionRoutePlan() {
+  return [
+    {
+      gameId: 'reaction',
+      title: 'Reaction Timer',
+      goal: scores.bestReaction === null ? 'Log two clean benchmarks.' : `Beat ${Math.max(180, scores.bestReaction - 12).toFixed(0)} ms once.`,
+    },
+    {
+      gameId: 'memory',
+      title: 'Memory Match',
+      goal: scores.memoryWins >= 5 ? 'Clear one board without a mismatch.' : `Add ${Math.min(2, Math.max(1, 5 - scores.memoryWins))} clean board win${Math.min(2, Math.max(1, 5 - scores.memoryWins)) === 1 ? '' : 's'}.`,
+    },
+    {
+      gameId: 'sequence',
+      title: 'Sequence Recall',
+      goal: `Reach round ${Math.max(4, Math.min(10, scores.bestSequence + 1))}.`,
+    },
+    {
+      gameId: 'pattern',
+      title: 'Pattern Sprint',
+      goal: `Finish at ${Math.max(12, Math.min(24, scores.bestPattern + 3))}+ points.`,
+    },
+  ];
+}
+
+function renderSessionRoute() {
+  if (!sessionRouteEl) return;
+
+  const route = sessionRouteState.steps.length ? sessionRouteState.steps : buildSessionRoutePlan();
+  const activeStep = route[sessionRouteState.stepIndex];
+  const completedSteps = Math.min(sessionRouteState.stepIndex, route.length);
+  const rows = route
+    .map((step, index) => {
+      const label = index < completedSteps ? 'Done' : index === sessionRouteState.stepIndex && sessionRouteState.active ? 'Now' : 'Next';
+      return `<p><strong>${label}:</strong> ${step.title} - ${step.goal}</p>`;
+    })
+    .join('');
+
+  if (!sessionRouteState.active && !sessionRouteState.completed) {
+    sessionRouteEl.innerHTML = `<p><strong>Preview:</strong> four-stop route for ${currentDifficulty} difficulty.</p>${rows}`;
+  } else if (sessionRouteState.completed) {
+    sessionRouteEl.innerHTML = `<p><strong>Route complete.</strong> You cleared all four stops on ${sessionRouteState.difficulty}. Start a fresh route to regenerate targets from the current profile.</p>${rows}`;
+  } else {
+    sessionRouteEl.innerHTML = `<p><strong>Live route:</strong> step ${sessionRouteState.stepIndex + 1} of ${route.length} on ${sessionRouteState.difficulty}.</p><p><strong>Current stop:</strong> ${activeStep?.title || 'Complete the route'} - ${activeStep?.goal || 'All stops cleared.'}</p>${rows}`;
+  }
+}
+
+function startSessionRoute() {
+  sessionRouteState = {
+    active: true,
+    completed: false,
+    stepIndex: 0,
+    difficulty: currentDifficulty,
+    steps: buildSessionRoutePlan(),
+  };
+  saveSessionRouteState();
+  renderSessionRoute();
+  setGame(sessionRouteState.steps[0].gameId);
+  gameNote.textContent = `Started a four-stop session route on ${currentDifficulty} difficulty.`;
+}
+
+function advanceSessionRoute() {
+  if (!sessionRouteState.active || !sessionRouteState.steps.length) {
+    startSessionRoute();
+    return;
+  }
+
+  sessionRouteState.stepIndex += 1;
+  if (sessionRouteState.stepIndex >= sessionRouteState.steps.length) {
+    sessionRouteState.active = false;
+    sessionRouteState.completed = true;
+    sessionRouteState.stepIndex = sessionRouteState.steps.length;
+    gameNote.textContent = 'Session route complete. Regenerate it when you want a new four-stop practice pass.';
+  } else {
+    const nextStep = sessionRouteState.steps[sessionRouteState.stepIndex];
+    setGame(nextStep.gameId);
+    gameNote.textContent = `Advanced the session route to ${nextStep.title}.`;
+  }
+
+  saveSessionRouteState();
+  renderSessionRoute();
+}
+
+function resetSessionRoute() {
+  sessionRouteState = { active: false, completed: false, stepIndex: 0, difficulty: currentDifficulty, steps: [] };
+  saveSessionRouteState();
+  renderSessionRoute();
+  gameNote.textContent = 'Session route cleared.';
 }
 
 function renderPortfolioHandoff() {
@@ -1345,6 +1470,7 @@ function refreshScoreboard() {
   renderTrainingPlan();
   renderSessionChallenge();
   renderGauntletPlanner();
+  renderSessionRoute();
   renderPortfolioHandoff();
   renderMomentumContract();
   renderCrossTrainingPair();
@@ -2038,6 +2164,9 @@ copyGauntletPlanBtn?.addEventListener('click', async () => {
     gameNote.textContent = 'Clipboard copy failed in this environment.';
   }
 });
+startSessionRouteBtn?.addEventListener('click', startSessionRoute);
+advanceSessionRouteBtn?.addEventListener('click', advanceSessionRoute);
+resetSessionRouteBtn?.addEventListener('click', resetSessionRoute);
 importScoresBtn?.addEventListener('click', () => importScoresFile?.click());
 importScoresFile?.addEventListener('change', importScores);
 focusModeBtn?.addEventListener('click', () => {

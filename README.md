@@ -82,6 +82,10 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
    - Converts the current profile into a four-stop cross-game training route.
    - Keeps one concrete score gate per game visible for portfolio walkthroughs.
 
+19. **Session Route**
+   - Turns the gauntlet into a live four-stop practice route with one active step at a time.
+   - Moves the current tab to the next recommended game so the coaching layer becomes an actual session workflow.
+
 14. **Live Scoreboard Sync**
    - Total runs, streak counters, coach panels, and run history now refresh after every logged run instead of only on personal-best updates.
 
@@ -176,6 +180,7 @@ Open `http://localhost:8000`.
 3. Change difficulty to show profile-aware recommendations.
 4. Use `Copy Training Brief` as the handoff artifact.
 5. Run the Gauntlet Planner once to show how the profile turns into an intentional cross-game practice route.
+6. Start the Session Route when you want the arcade to drive the next four reps instead of only describing them.
 
 ## Practice Artifact Workflow
 
