@@ -973,10 +973,10 @@ function renderNextBreakthroughBoard() {
 
   candidates.push({
     label: 'Reaction Timer',
-    gap: Math.max(0, 250 - scores.reactionBest),
-    move: scores.reactionBest >= 250
-      ? `Already inside the fast lane at ${scores.reactionBest} ms. Protect consistency on the ${profile.reactionLabel} setup.`
-      : `Cut ${Math.max(1, 250 - scores.reactionBest)} ms off the current best to re-enter the fast lane.`,
+    gap: Math.max(0, (scores.bestReaction ?? 250) - 250),
+    move: scores.bestReaction !== null && scores.bestReaction <= 250
+      ? `Already inside the fast lane at ${Math.round(scores.bestReaction)} ms. Protect consistency on the ${profile.reactionLabel} setup.`
+      : `Cut ${Math.max(1, Math.round((scores.bestReaction ?? 500) - 250))} ms off the current best to re-enter the fast lane.`,
   });
   candidates.push({
     label: 'Memory Match',
@@ -987,17 +987,17 @@ function renderNextBreakthroughBoard() {
   });
   candidates.push({
     label: 'Sequence Recall',
-    gap: Math.max(0, 10 - scores.sequenceBest),
-    move: scores.sequenceBest >= 10
-      ? `The round ceiling is already ${scores.sequenceBest}. Hold depth under the ${profile.sequenceLength}-step cadence.`
-      : `Add ${Math.max(1, 10 - scores.sequenceBest)} more round${Math.max(1, 10 - scores.sequenceBest) === 1 ? '' : 's'} before rotating away.`,
+    gap: Math.max(0, 10 - scores.bestSequence),
+    move: scores.bestSequence >= 10
+      ? `The round ceiling is already ${scores.bestSequence}. Hold depth under the ${profile.sequenceLength}-step cadence.`
+      : `Add ${Math.max(1, 10 - scores.bestSequence)} more round${Math.max(1, 10 - scores.bestSequence) === 1 ? '' : 's'} before rotating away.`,
   });
   candidates.push({
     label: 'Pattern Sprint',
-    gap: Math.max(0, 20 - scores.patternBest),
-    move: scores.patternBest >= 20
+    gap: Math.max(0, 20 - scores.bestPattern),
+    move: scores.bestPattern >= 20
       ? `Pattern Sprint is already above the all-rounder floor. Push for a cleaner run on ${profile.patternTarget} targets.`
-      : `Score ${Math.max(1, 20 - scores.patternBest)} more point${Math.max(1, 20 - scores.patternBest) === 1 ? '' : 's'} to turn this lane into a reliable contributor.`,
+      : `Score ${Math.max(1, 20 - scores.bestPattern)} more point${Math.max(1, 20 - scores.bestPattern) === 1 ? '' : 's'} to turn this lane into a reliable contributor.`,
   });
 
   candidates.sort((left, right) => left.gap - right.gap);
@@ -1946,9 +1946,11 @@ function mountPatternGame() {
 
   let tiles = [];
   let running = false;
+  let paused = false;
   let score = 0;
   let hotIndex = -1;
   let gameStart = 0;
+  let elapsedBeforePause = 0;
   let hotSwitchId = null;
   let frameId = null;
   const keyToIndex = {
@@ -2010,8 +2012,30 @@ function mountPatternGame() {
     }
   }
 
+  function startHotSwitchLoop() {
+    hotSwitchId = setInterval(() => {
+      if (!running || paused) return;
+      selectNextHot(hotIndex);
+    }, profile.patternSwitch);
+  }
+
+  function pauseSprint() {
+    if (!running || paused) return;
+    elapsedBeforePause += (performance.now() - gameStart) / 1000;
+    paused = true;
+    running = false;
+    clearTimers();
+    tiles.forEach((tile) => tile.classList.remove('hot'));
+    startButton.disabled = false;
+    startButton.textContent = 'Resume Sprint';
+    timerEl.textContent = `Time: ${Math.max(0, profile.patternDuration - elapsedBeforePause).toFixed(1)}s`;
+    messageEl.textContent = 'Sprint paused after the tab lost focus. Resume to keep the same clock and score.';
+  }
+
   function endGame() {
     running = false;
+    paused = false;
+    elapsedBeforePause = 0;
     clearTimers();
     tiles.forEach((tile) => tile.classList.remove('hot'));
     addRunEntry('Pattern Sprint', `Score ${score}`);
@@ -2024,13 +2048,14 @@ function mountPatternGame() {
     refreshScoreboard();
 
     startButton.disabled = false;
+    startButton.textContent = 'Start Sprint';
     messageEl.textContent = `Sprint complete. Final score: ${score}.`;
   }
 
   function tick() {
     if (!running) return;
 
-    const elapsed = (performance.now() - gameStart) / 1000;
+    const elapsed = elapsedBeforePause + (performance.now() - gameStart) / 1000;
     const remaining = Math.max(0, profile.patternDuration - elapsed);
     timerEl.textContent = `Time: ${remaining.toFixed(1)}s`;
 
@@ -2043,22 +2068,33 @@ function mountPatternGame() {
   }
 
   startButton.addEventListener('click', () => {
+    if (paused) {
+      paused = false;
+      running = true;
+      gameStart = performance.now();
+      startButton.disabled = true;
+      startButton.textContent = 'Start Sprint';
+      messageEl.textContent = 'Sprint resumed. Keep the pace.';
+      selectNextHot();
+      startHotSwitchLoop();
+      frameId = requestAnimationFrame(tick);
+      return;
+    }
+
     buildGrid();
     score = 0;
+    elapsedBeforePause = 0;
     scoreEl.textContent = 'Score: 0';
     timerEl.textContent = `Time: ${profile.patternDuration.toFixed(1)}s`;
     messageEl.textContent = 'Go! Hit glowing tiles quickly.';
     startButton.disabled = true;
+    startButton.textContent = 'Start Sprint';
 
     running = true;
     gameStart = performance.now();
     selectNextHot();
 
-    hotSwitchId = setInterval(() => {
-      if (!running) return;
-      selectNextHot(hotIndex);
-    }, profile.patternSwitch);
-
+    startHotSwitchLoop();
     frameId = requestAnimationFrame(tick);
   });
 
@@ -2080,13 +2116,16 @@ function mountPatternGame() {
   }
 
   window.addEventListener('keydown', handlePatternKey);
+  document.addEventListener('visibilitychange', pauseSprint);
 
   buildGrid();
 
   return () => {
     running = false;
+    paused = false;
     clearTimers();
     window.removeEventListener('keydown', handlePatternKey);
+    document.removeEventListener('visibilitychange', pauseSprint);
   };
 }
 

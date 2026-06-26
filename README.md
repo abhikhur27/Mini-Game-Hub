@@ -21,6 +21,7 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
    - 25-second reflex challenge on a 3x3 live target grid.
    - Dynamic scoring and personal best tracking.
    - Keyboard grid support on `1-9` in addition to mouse clicks.
+   - Auto-pauses when the browser tab loses focus so background throttling does not burn the timer.
 
 5. **Achievements Layer**
    - Unlock milestones across all games.
