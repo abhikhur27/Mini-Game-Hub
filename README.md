@@ -186,6 +186,7 @@ Open `http://localhost:8000`.
 ## Practice Artifact Workflow
 
 - `Copy Challenge Link` is for reopening one focused training state quickly.
+- Challenge links now preserve focus mode in the URL, so low-clutter portfolio walkthroughs reopen with the same reduced sidebar.
 - `Copy Training Brief` is for a short portfolio walkthrough or coach-style handoff.
 - `Copy Recovery Drill` is the better export when the story is about a weak lane instead of the strongest one.
 - `Export Scores` plus `Export Run Log CSV` is the reproducibility path when the arcade profile should survive beyond one browser session.

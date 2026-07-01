@@ -138,6 +138,11 @@ function syncUrlState(gameId = document.querySelector('.tab.active')?.dataset.ga
   const params = new URLSearchParams(window.location.search);
   params.set('game', gameId);
   params.set('difficulty', currentDifficulty);
+  if (focusModeEnabled) {
+    params.set('focus', '1');
+  } else {
+    params.delete('focus');
+  }
   const nextUrl = `${window.location.pathname}?${params.toString()}`;
   window.history.replaceState({}, '', nextUrl);
 }
@@ -153,6 +158,15 @@ function hydrateFromUrlState() {
   const requestedGame = params.get('game');
   if (requestedGame && gameMeta[requestedGame]) {
     initialGameId = requestedGame;
+  }
+
+  const requestedFocus = params.get('focus');
+  if (requestedFocus === '1') {
+    focusModeEnabled = true;
+    localStorage.setItem(focusModeKey, 'true');
+  } else if (requestedFocus === '0') {
+    focusModeEnabled = false;
+    localStorage.setItem(focusModeKey, 'false');
   }
 }
 
@@ -2211,6 +2225,7 @@ importScoresFile?.addEventListener('change', importScores);
 focusModeBtn?.addEventListener('click', () => {
   focusModeEnabled = !focusModeEnabled;
   localStorage.setItem(focusModeKey, String(focusModeEnabled));
+  syncUrlState();
   applyFocusMode();
   gameNote.textContent = focusModeEnabled
     ? 'Portfolio focus mode enabled. The sidebar now keeps only the core walkthrough surfaces.'
