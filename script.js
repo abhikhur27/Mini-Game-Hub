@@ -171,9 +171,39 @@ function hydrateFromUrlState() {
 }
 
 const difficultyProfiles = {
-  casual: { reactionMin: 1200, reactionRange: 2400, memoryPairs: 5, sequenceDelay: 720, patternDuration: 28, patternSwitch: 720 },
-  standard: { reactionMin: 900, reactionRange: 2200, memoryPairs: 6, sequenceDelay: 600, patternDuration: 25, patternSwitch: 620 },
-  expert: { reactionMin: 650, reactionRange: 1700, memoryPairs: 8, sequenceDelay: 470, patternDuration: 22, patternSwitch: 480 },
+  casual: {
+    reactionMin: 1200,
+    reactionRange: 2400,
+    memoryPairs: 5,
+    sequenceDelay: 720,
+    patternDuration: 28,
+    patternSwitch: 720,
+    reactionLabel: 'wide warm-up timing window',
+    sequenceLabel: 'slower recall cadence',
+    patternTarget: 'longer target dwell windows',
+  },
+  standard: {
+    reactionMin: 900,
+    reactionRange: 2200,
+    memoryPairs: 6,
+    sequenceDelay: 600,
+    patternDuration: 25,
+    patternSwitch: 620,
+    reactionLabel: 'balanced timing window',
+    sequenceLabel: 'baseline recall cadence',
+    patternTarget: 'balanced target tempo',
+  },
+  expert: {
+    reactionMin: 650,
+    reactionRange: 1700,
+    memoryPairs: 8,
+    sequenceDelay: 470,
+    patternDuration: 22,
+    patternSwitch: 480,
+    reactionLabel: 'compressed timing window',
+    sequenceLabel: 'fast recall cadence',
+    patternTarget: 'rapid target swaps',
+  },
 };
 sessionRouteState = loadSessionRouteState();
 
@@ -630,9 +660,9 @@ function renderDifficultyBrief() {
 
   difficultyBriefEl.innerHTML = [
     `<p><strong>${currentDifficulty[0].toUpperCase()}${currentDifficulty.slice(1)} profile:</strong> difficulty changes every game, not just score targets.</p>`,
-    `<p><strong>Reaction:</strong> ${targets.reaction}.</p>`,
-    `<p><strong>Memory / Sequence:</strong> ${targets.memory}; ${targets.sequence}.</p>`,
-    `<p><strong>Pattern Sprint:</strong> ${targets.pattern}. Use this profile when sharing a challenge link so the run conditions are explicit.</p>`,
+    `<p><strong>Reaction:</strong> ${targets.reaction}. This profile uses a ${profile.reactionLabel}.</p>`,
+    `<p><strong>Memory / Sequence:</strong> ${targets.memory}; ${targets.sequence} with a ${profile.sequenceLabel}.</p>`,
+    `<p><strong>Pattern Sprint:</strong> ${targets.pattern} with ${profile.patternTarget}. Use this profile when sharing a challenge link so the run conditions are explicit.</p>`,
   ].join('');
 }
 
@@ -989,7 +1019,7 @@ function renderNextBreakthroughBoard() {
     label: 'Reaction Timer',
     gap: Math.max(0, (scores.bestReaction ?? 250) - 250),
     move: scores.bestReaction !== null && scores.bestReaction <= 250
-      ? `Already inside the fast lane at ${Math.round(scores.bestReaction)} ms. Protect consistency on the ${profile.reactionLabel} setup.`
+      ? `Already inside the fast lane at ${Math.round(scores.bestReaction)} ms. Protect consistency inside this ${profile.reactionLabel}.`
       : `Cut ${Math.max(1, Math.round((scores.bestReaction ?? 500) - 250))} ms off the current best to re-enter the fast lane.`,
   });
   candidates.push({
@@ -1003,14 +1033,14 @@ function renderNextBreakthroughBoard() {
     label: 'Sequence Recall',
     gap: Math.max(0, 10 - scores.bestSequence),
     move: scores.bestSequence >= 10
-      ? `The round ceiling is already ${scores.bestSequence}. Hold depth under the ${profile.sequenceLength}-step cadence.`
+      ? `The round ceiling is already ${scores.bestSequence}. Hold depth under this ${profile.sequenceLabel}.`
       : `Add ${Math.max(1, 10 - scores.bestSequence)} more round${Math.max(1, 10 - scores.bestSequence) === 1 ? '' : 's'} before rotating away.`,
   });
   candidates.push({
     label: 'Pattern Sprint',
     gap: Math.max(0, 20 - scores.bestPattern),
     move: scores.bestPattern >= 20
-      ? `Pattern Sprint is already above the all-rounder floor. Push for a cleaner run on ${profile.patternTarget} targets.`
+      ? `Pattern Sprint is already above the all-rounder floor. Push for a cleaner run under ${profile.patternTarget}.`
       : `Score ${Math.max(1, 20 - scores.bestPattern)} more point${Math.max(1, 20 - scores.bestPattern) === 1 ? '' : 's'} to turn this lane into a reliable contributor.`,
   });
 

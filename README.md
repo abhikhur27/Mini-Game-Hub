@@ -111,6 +111,7 @@ Portfolio-grade browser arcade featuring four interactive games, difficulty pres
 
 22. **Difficulty Brief**
    - Explains how the current difficulty profile changes timing, memory load, and practice expectations across all four games.
+   - Difficulty-specific progression boards now use explicit cadence and tempo cues instead of generic cross-profile wording.
 23. **Breakthrough Board**
    - Highlights the easiest next personal-best jump for the currently selected difficulty.
 24. **Session Heat**
